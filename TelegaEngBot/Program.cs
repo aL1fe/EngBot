@@ -12,6 +12,7 @@ namespace TelegaEngBot;
 class Program
 {
     private static AppDbContext _dbContext;
+    private static bool _isSmileOn = true;
 
     static async Task Main(string[] args)
     {
@@ -68,13 +69,16 @@ class Program
                 await MessageHandler.Start(botClient, message, _dbContext);
                 break;
             case "Know":
-                await MessageHandler.Know(botClient, message, _dbContext);
+                await MessageHandler.Know(botClient, message, _dbContext, _isSmileOn);
                 break;
             case "Don't know":
-                await MessageHandler.NotKnow(botClient, message, _dbContext);
+                await MessageHandler.NotKnow(botClient, message, _dbContext,  _isSmileOn);
                 break;
             case "US pron":
                 await MessageHandler.Pron(botClient, message);
+                break;
+            case "/smile":
+                _isSmileOn = !_isSmileOn;
                 break;
         }
     }

@@ -38,18 +38,23 @@ internal static class MessageHandler
         await GetNewWord(botClient, message, dbContext);
     }
 
-    internal static async Task Know(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    internal static async Task Know(ITelegramBotClient botClient, Message message, AppDbContext dbContext,
+        bool isSmileOn)
     {
         //TODO Increase weight
-        await botClient.SendTextMessageAsync(message.Chat.Id,
-            char.ConvertFromUtf32(0x1F642)); //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+        if (isSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+            await botClient.SendTextMessageAsync(message.Chat.Id,
+                char.ConvertFromUtf32(0x1F642));
+
         await GetNewWord(botClient, message, dbContext);
     }
 
-    internal static async Task NotKnow(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    internal static async Task NotKnow(ITelegramBotClient botClient, Message message, AppDbContext dbContext,
+        bool isSmileOn)
     {
         //TODO Decrease weight
-        await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622)); //Sad smile
+        if (isSmileOn) //Sad smile
+            await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
         await GetNewWord(botClient, message, dbContext);
     }
 
