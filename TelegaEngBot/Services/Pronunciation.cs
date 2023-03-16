@@ -14,8 +14,6 @@ internal static class Pronunciation
         {
             var uri = Parser.ParsHtml(engWordTransform);
 
-            //uri = "https://dictionary.cambridge.org/media/english/us_pron/d/dog/dog__/g.mp3";  // delete
-            //uri = null; // delete
             try
             {
                 await botClient.SendAudioAsync(message.Chat.Id, audio: uri);
