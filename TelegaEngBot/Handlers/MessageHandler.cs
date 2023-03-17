@@ -1,4 +1,5 @@
-﻿using TelegaEngBot.DataAccessLayer;
+﻿using NLog;
+using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 using TelegaEngBot.Services;
 using Telegram.Bot;
@@ -16,6 +17,7 @@ internal static class MessageHandler
     private static KeyboardButton _btnUsPron;
     private static ReplyKeyboardMarkup _Keyboard2btn;
     private static ReplyKeyboardMarkup _Keyboard3btn;
+    private static Logger _logger = LogManager.GetCurrentClassLogger();
 
     private static void InitiateKeyboard()
     {
@@ -45,7 +47,8 @@ internal static class MessageHandler
         if (isSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
             await botClient.SendTextMessageAsync(message.Chat.Id,
                 char.ConvertFromUtf32(0x1F642));
-
+        if (_word != null)
+            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
         await GetNewWord(botClient, message, dbContext);
     }
 
@@ -55,6 +58,8 @@ internal static class MessageHandler
         //TODO Decrease weight
         if (isSmileOn) //Sad smile
             await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
+        if (_word != null)
+            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
         await GetNewWord(botClient, message, dbContext);
     }
 

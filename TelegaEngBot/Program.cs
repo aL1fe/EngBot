@@ -1,4 +1,5 @@
-﻿using TelegaEngBot.AppConfigurations;
+﻿using NLog;
+using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Handlers;
 using TelegaEngBot.Identity;
@@ -13,6 +14,7 @@ class Program
 {
     private static AppDbContext _dbContext;
     private static bool _isSmileOn = true;
+    private static Logger _logger = LogManager.GetCurrentClassLogger();
 
     static async Task Main(string[] args)
     {
@@ -26,7 +28,7 @@ class Program
         // TelegramBot init
         var botClient = new TelegramBotClient(AppConfig.BotToken);
         using var cts = new CancellationTokenSource();
-        
+
         var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
 
         botClient.StartReceiving(
@@ -37,21 +39,17 @@ class Program
         );
 
         var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
-        Console.WriteLine($"Start listening for @{me.Username}");
+        _logger.Info("Start listening for @" + me.Username + ".");
+        Console.WriteLine("Start listening for @" + me.Username);
 
         Console.ReadLine();
+        _logger.Info("Stop program.");
     }
-   
-    private static async Task HandleUpdate(
-        ITelegramBotClient botClient,
-        Update update,
-        CancellationToken ct
-    )
+
+    private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
         if (update.Type == UpdateType.Message && update?.Message?.Text != null)
-        {
             await HandleMessage(botClient, update.Message);
-        }
     }
 
     private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
@@ -72,7 +70,7 @@ class Program
                 await MessageHandler.Know(botClient, message, _dbContext, _isSmileOn);
                 break;
             case "Don't know":
-                await MessageHandler.NotKnow(botClient, message, _dbContext,  _isSmileOn);
+                await MessageHandler.NotKnow(botClient, message, _dbContext, _isSmileOn);
                 break;
             case "US pron":
                 await MessageHandler.Pron(botClient, message);
