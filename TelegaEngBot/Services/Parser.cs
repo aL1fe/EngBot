@@ -21,7 +21,7 @@ internal static class Parser
                 listUris.Add("https://dictionary.cambridge.org" + res);
         }
 
-        if (listUris.Capacity <= 2 ) //if only 2 values are found, therefor the required word is missing
+        if (listUris.Capacity < 2 ) //if only 2 values are found, therefor the required word is missing
         {
             return null;
         }
