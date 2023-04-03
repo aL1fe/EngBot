@@ -8,7 +8,7 @@ internal static class IdentityServer
 {
     internal static bool CheckAuth(long id)
     {
-        if (id != 450056320) //438560103 Chilikin, 558784871 Prygun
+        if (id != 450056320) //438560103 Chilikin, 558784871 Prygun, Dima
         {
             return false;
         }
