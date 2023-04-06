@@ -23,7 +23,7 @@ internal static class MessageHandler
     {
         _btnKnow = new KeyboardButton("Know");
         _btnNotKnow = new KeyboardButton("Don't know");
-        _btnUsPron = new KeyboardButton("US pron");
+        _btnUsPron = new KeyboardButton("Pronunciation");
 
         // Create rows
         var row1 = new[] {_btnKnow, _btnNotKnow};

@@ -13,7 +13,7 @@ namespace TelegaEngBot;
 class Program
 {
     private static AppDbContext _dbContext;
-    private static bool _isSmileOn = true;
+    private static bool _isSmileOn = false;
     private static Logger _logger = LogManager.GetCurrentClassLogger();
 
     static async Task Main(string[] args)
@@ -54,12 +54,16 @@ class Program
 
     private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
     {
-        // Check authorization
-        if (!IdentityServer.CheckAuth(message.Chat.Id))
-        {
-            await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
-            return;
-        }
+        //Check authorization
+         if (!IdentityServer.CheckAuth(message.From.Id))
+         {
+             await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
+             _logger.Info("New user tried to connect. User Id: " + message.From.Id
+                                                                 + " Username: " + message.From.Username
+                                                                 + " FirstName: " + message.From.FirstName
+                                                                 + " LastName: " + message.From.LastName);
+             return;
+         }
 
         switch (message.Text)
         {
@@ -72,12 +76,17 @@ class Program
             case "Don't know":
                 await MessageHandler.NotKnow(botClient, message, _dbContext, _isSmileOn);
                 break;
-            case "US pron":
+            case "Pronunciation":
                 await MessageHandler.Pron(botClient, message);
                 break;
             case "/smile":
                 _isSmileOn = !_isSmileOn;
                 break;
+            case "/pronunciation":
+                //_isSmileOn = !_isSmileOn;
+                break;
         }
     }
 }
+//https://t.me/my_aL1fe_bot
+//https://t.me/PhrasesAndWords_bot
