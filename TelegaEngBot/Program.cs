@@ -83,7 +83,7 @@ class Program
                 _isSmileOn = !_isSmileOn;
                 break;
             case "/pronunciation":
-                //_isSmileOn = !_isSmileOn;
+                MessageHandler._isPronunciationOn = !MessageHandler._isPronunciationOn;
                 break;
         }
     }
