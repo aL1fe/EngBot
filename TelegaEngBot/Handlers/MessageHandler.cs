@@ -12,13 +12,13 @@ namespace TelegaEngBot.Handlers;
 internal static class MessageHandler
 {
     private static Word? _word;
-    private static KeyboardButton _btnKnow;
-    private static KeyboardButton _btnNotKnow;
-    private static KeyboardButton _btnUsPron;
+    private static KeyboardButton? _btnKnow;
+    private static KeyboardButton? _btnNotKnow;
+    private static KeyboardButton? _btnUsPron;
     private static ReplyKeyboardMarkup? _keyboard2Btn;
     private static ReplyKeyboardMarkup? _keyboard3Btn;
     private static Logger _logger = LogManager.GetCurrentClassLogger();
-    internal static bool _isPronunciationOn = false;
+    internal static bool IsPronunciationOn = false;
 
     private static void InitiateKeyboard()
     {
@@ -86,7 +86,7 @@ internal static class MessageHandler
         }
 
         // Redraw keyboard
-        if (Validator.ValidateAndTransform(_word.EngWord) != "error" && _isPronunciationOn)
+        if (Validator.ValidateAndTransform(_word.EngWord) != "error" && IsPronunciationOn)
         {
             await botClient.SendTextMessageAsync(message.Chat.Id, "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
                 ParseMode.Html, replyMarkup: _keyboard3Btn);
