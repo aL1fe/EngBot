@@ -7,9 +7,9 @@ namespace TelegaEngBot.Services;
 
 internal static class Pronunciation
 {
-    internal static async Task PronUs(ITelegramBotClient botClient, Message message, Word word)
+    internal static async Task PronUs(ITelegramBotClient botClient, Message message, Article article)
     {
-        var engWordTransform = Validator.ValidateAndTransform(word.EngWord);
+        var engWordTransform = Validator.ValidateAndTransform(article.EngWord);
         if (engWordTransform != "error")
         {
             var uri = Parser.ParsHtml(engWordTransform);

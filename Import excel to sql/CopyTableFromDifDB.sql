@@ -1,4 +1,4 @@
-insert into [Mnemonics].[dbo].[Dictionary](Id, EngWord, RusWord, UrlLink)
+insert into [Mnemonics].[dbo].[CommonVocabulary](Id, EngWord, RusWord, UrlLink)
 select 
 	NEWID()
 	,[Excel].[dbo].[Dict].[Eng]

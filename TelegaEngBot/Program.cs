@@ -19,7 +19,7 @@ class Program
     static async Task Main(string[] args)
     {
         _dbContext = new AppDbContext();
-        if (!_dbContext.Dictionary.Any())
+        if (!_dbContext.CommonVocabulary.Any())
         {
             Console.WriteLine("Database is empty.");
             return;

@@ -1,6 +1,6 @@
 ﻿namespace TelegaEngBot.Models;
 
-public class Word
+public class Article
 {
     public Guid Id { get; set; }
     public string EngWord { get; set; } = null!;

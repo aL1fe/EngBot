@@ -11,7 +11,7 @@ namespace TelegaEngBot.Handlers;
 
 internal static class MessageHandler
 {
-    private static Word? _word;
+    private static Article? _article;
     private static KeyboardButton? _btnKnow;
     private static KeyboardButton? _btnNotKnow;
     private static KeyboardButton? _btnUsPron;
@@ -48,8 +48,8 @@ internal static class MessageHandler
         if (isSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
             await botClient.SendTextMessageAsync(message.Chat.Id,
                 char.ConvertFromUtf32(0x1F642));
-        if (_word != null)
-            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
+        if (_article != null)
+            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " + _article.RusWord);
         await GetNewWord(botClient, message, dbContext);
     }
 
@@ -59,15 +59,15 @@ internal static class MessageHandler
         //TODO Decrease weight
         if (isSmileOn) //Sad smile
             await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
-        if (_word != null)
-            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
+        if (_article != null)
+            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " + _article.RusWord);
         await GetNewWord(botClient, message, dbContext);
     }
 
     internal static async Task Pron(ITelegramBotClient botClient, Message message)
     {
-        if (_word == null) return;
-        await Pronunciation.PronUs(botClient, message, _word);
+        if (_article == null) return;
+        await Pronunciation.PronUs(botClient, message, _article);
         await botClient.SendTextMessageAsync(message.Chat.Id, "Click play to listen.", ParseMode.Html,
             replyMarkup: _keyboard2Btn);
     }
@@ -75,9 +75,9 @@ internal static class MessageHandler
     private static async Task GetNewWord(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
     {
         var rnd = new Random();
-        var rndWord = rnd.Next(0, dbContext.Dictionary.Count());
-        _word = dbContext.Dictionary.Skip(rndWord).Take(1).FirstOrDefault();
-        await botClient.SendTextMessageAsync(message.Chat.Id, _word.RusWord);
+        var rndWord = rnd.Next(0, dbContext.CommonVocabulary.Count());
+        _article = dbContext.CommonVocabulary.Skip(rndWord).Take(1).FirstOrDefault();
+        await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
 
         // Checking if the keyboard is initialized
         if (_keyboard2Btn == null || _keyboard3Btn == null)
@@ -90,11 +90,11 @@ internal static class MessageHandler
 
     internal static async Task RedrawKeyboard(ITelegramBotClient botClient, Message message, bool ifTypeWord)
     {
-        if (Validator.ValidateAndTransform(_word.EngWord) != "error" && IsPronunciationOn)
+        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && IsPronunciationOn)
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id, 
-                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _keyboard3Btn);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id, 
@@ -105,7 +105,7 @@ internal static class MessageHandler
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id,
