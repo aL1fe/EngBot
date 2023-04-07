@@ -84,9 +84,11 @@ class Program
                 break;
             case "/pronunciation":
                 MessageHandler.IsPronunciationOn = !MessageHandler.IsPronunciationOn;
+                await MessageHandler.RedrawKeyboard(botClient, message, false);
                 break;
         }
     }
+    
 }
 //https://t.me/my_aL1fe_bot
 //https://t.me/PhrasesAndWords_bot

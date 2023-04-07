@@ -85,16 +85,32 @@ internal static class MessageHandler
             InitiateKeyboard();
         }
 
-        // Redraw keyboard
+        await RedrawKeyboard(botClient, message, true);
+    }
+
+    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, Message message, bool ifTypeWord)
+    {
         if (Validator.ValidateAndTransform(_word.EngWord) != "error" && IsPronunciationOn)
         {
-            await botClient.SendTextMessageAsync(message.Chat.Id, "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
-                ParseMode.Html, replyMarkup: _keyboard3Btn);
+            if (ifTypeWord)
+                await botClient.SendTextMessageAsync(message.Chat.Id, 
+                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                    ParseMode.Html, replyMarkup: _keyboard3Btn);
+            else
+                await botClient.SendTextMessageAsync(message.Chat.Id, 
+                    "Click \"Pronunciation\" to listen word.",
+                    ParseMode.Html, replyMarkup: _keyboard3Btn);
         }
         else
         {
-            await botClient.SendTextMessageAsync(message.Chat.Id, "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
-                ParseMode.Html, replyMarkup: _keyboard2Btn);
+            if (ifTypeWord)
+                await botClient.SendTextMessageAsync(message.Chat.Id,
+                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                    ParseMode.Html, replyMarkup: _keyboard2Btn);
+            else
+                await botClient.SendTextMessageAsync(message.Chat.Id,
+                    "Button \"Pronunciation\" is " + (IsPronunciationOn ? "On" : "Off"),
+                    ParseMode.Html, replyMarkup: _keyboard2Btn);
         }
     }
 }
