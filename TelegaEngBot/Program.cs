@@ -16,7 +16,7 @@ class Program
     private static bool _isSmileOn = false;
     private static Logger _logger = LogManager.GetCurrentClassLogger();
 
-    static async Task Main(string[] args)
+    static async Task Main()
     {
         _dbContext = new AppDbContext();
         if (!_dbContext.CommonVocabulary.Any())
@@ -28,9 +28,7 @@ class Program
         // TelegramBot init
         var botClient = new TelegramBotClient(AppConfig.BotToken);
         using var cts = new CancellationTokenSource();
-
         var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
-
         botClient.StartReceiving(
             HandleUpdate,
             ErrorHandler.HandleError,
@@ -55,15 +53,15 @@ class Program
     private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
     {
         //Check authorization
-         if (!IdentityServer.CheckAuth(message.From.Id))
-         {
-             await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
-             _logger.Info("New user tried to connect. User Id: " + message.From.Id
-                                                                 + " Username: " + message.From.Username
-                                                                 + " FirstName: " + message.From.FirstName
-                                                                 + " LastName: " + message.From.LastName);
-             return;
-         }
+        if (!IdentityServer.CheckAuth(message.From.Id))
+        {
+            await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
+            _logger.Info("New user tried to connect. User Id: " + message.From.Id
+                                                                + " Username: " + message.From.Username
+                                                                + " FirstName: " + message.From.FirstName
+                                                                + " LastName: " + message.From.LastName);
+            return;
+        }
 
         switch (message.Text)
         {
@@ -80,15 +78,14 @@ class Program
                 await MessageHandler.Pron(botClient, message);
                 break;
             case "/smile":
-                _isSmileOn = !_isSmileOn;
+                _isSmileOn = !_isSmileOn; //todo
                 break;
             case "/pronunciation":
-                MessageHandler.IsPronunciationOn = !MessageHandler.IsPronunciationOn;
+                MessageHandler.IsPronunciationOn = !MessageHandler.IsPronunciationOn; //todo
                 await MessageHandler.RedrawKeyboard(botClient, message, false);
                 break;
         }
     }
-    
 }
 //https://t.me/my_aL1fe_bot
 //https://t.me/PhrasesAndWords_bot
