@@ -29,7 +29,9 @@ namespace TelegaEngBot.Migrations
                 name: "UserSettings",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsPronunciationOn = table.Column<bool>(type: "bit", nullable: false),
+                    IsSmileOn = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,9 +42,11 @@ namespace TelegaEngBot.Migrations
                 name: "UserList",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TelegramUserId = table.Column<long>(type: "bigint", nullable: false),
+                    TelegramUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TelegramFirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TelegramLastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TotalArticlesWeight = table.Column<int>(type: "int", nullable: false),
                     UserSettingsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -64,7 +68,7 @@ namespace TelegaEngBot.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ArticleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Weight = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,8 +80,8 @@ namespace TelegaEngBot.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserVocabularyItem_UserList_UserId",
-                        column: x => x.UserId,
+                        name: "FK_UserVocabularyItem_UserList_AppUserId",
+                        column: x => x.AppUserId,
                         principalTable: "UserList",
                         principalColumn: "Id");
                 });
@@ -88,14 +92,14 @@ namespace TelegaEngBot.Migrations
                 column: "UserSettingsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserVocabularyItem_AppUserId",
+                table: "UserVocabularyItem",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserVocabularyItem_ArticleId",
                 table: "UserVocabularyItem",
                 column: "ArticleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserVocabularyItem_UserId",
-                table: "UserVocabularyItem",
-                column: "UserId");
         }
 
         /// <inheritdoc />

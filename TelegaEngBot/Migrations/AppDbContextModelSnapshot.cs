@@ -22,6 +22,37 @@ namespace TelegaEngBot.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("TelegaEngBot.Models.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TelegramFirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TelegramLastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TelegramUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalArticlesWeight")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserSettingsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserSettingsId");
+
+                    b.ToTable("UserList");
+                });
+
             modelBuilder.Entity("TelegaEngBot.Models.Article", b =>
                 {
                     b.Property<Guid>("Id")
@@ -44,35 +75,17 @@ namespace TelegaEngBot.Migrations
                     b.ToTable("CommonVocabulary");
                 });
 
-            modelBuilder.Entity("TelegaEngBot.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TotalArticlesWeight")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserSettingsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserSettingsId");
-
-                    b.ToTable("UserList");
-                });
-
             modelBuilder.Entity("TelegaEngBot.Models.UserSettings", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsPronunciationOn")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSmileOn")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -85,25 +98,25 @@ namespace TelegaEngBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ArticleId")
+                    b.Property<Guid?>("AppUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Weight")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticleId");
+                    b.HasIndex("AppUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ArticleId");
 
                     b.ToTable("UserVocabularyItem");
                 });
 
-            modelBuilder.Entity("TelegaEngBot.Models.User", b =>
+            modelBuilder.Entity("TelegaEngBot.Models.AppUser", b =>
                 {
                     b.HasOne("TelegaEngBot.Models.UserSettings", "UserSettings")
                         .WithMany()
@@ -116,20 +129,20 @@ namespace TelegaEngBot.Migrations
 
             modelBuilder.Entity("TelegaEngBot.Models.UserVocabularyItem", b =>
                 {
+                    b.HasOne("TelegaEngBot.Models.AppUser", null)
+                        .WithMany("UserVocabulary")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("TelegaEngBot.Models.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TelegaEngBot.Models.User", null)
-                        .WithMany("UserVocabulary")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Article");
                 });
 
-            modelBuilder.Entity("TelegaEngBot.Models.User", b =>
+            modelBuilder.Entity("TelegaEngBot.Models.AppUser", b =>
                 {
                     b.Navigation("UserVocabulary");
                 });

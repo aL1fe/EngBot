@@ -1,8 +1,10 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore;
+using NLog;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Handlers;
 using TelegaEngBot.Identity;
+using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -22,8 +24,11 @@ class Program
         if (!_dbContext.CommonVocabulary.Any())
         {
             Console.WriteLine("Database is empty.");
-            return;
+            Seeder.Seed(_dbContext); //todo
+            //return;
         }
+        
+        var userVocabulary = _dbContext.CommonVocabulary;
 
         // TelegramBot init
         var botClient = new TelegramBotClient(AppConfig.BotToken);
@@ -46,7 +51,9 @@ class Program
 
     private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        if (update.Type == UpdateType.Message && update?.Message?.Text != null)
+        if (update.Type == UpdateType.Message 
+            && update.Message?.Text != null 
+            && update.Message.From != null)
             await HandleMessage(botClient, update.Message);
     }
 
@@ -63,16 +70,30 @@ class Program
             return;
         }
 
+        var commonVac = _dbContext.CommonVocabulary;
+        var userList = _dbContext.UserList
+            .Where(x=>x.TelegramUserId == message.From.Id)
+            .Include(x => x.UserVocabulary)
+            .Include(x => x.UserSettings);
+        var user = userList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
+
+        if (user == null) // If null Create User in database
+        {
+            var userService = new UserService(_dbContext);
+            user = userService.CreateUser(message.From.Id, message);
+            message.Text = "/start";
+        }
+
         switch (message.Text)
         {
             case "/start":
                 await MessageHandler.Start(botClient, message, _dbContext);
                 break;
             case "Know":
-                await MessageHandler.Know(botClient, message, _dbContext, _isSmileOn);
+                await MessageHandler.Know(botClient, message, _dbContext, user);
                 break;
             case "Don't know":
-                await MessageHandler.NotKnow(botClient, message, _dbContext, _isSmileOn);
+                await MessageHandler.NotKnow(botClient, message, _dbContext, user);
                 break;
             case "Pronunciation":
                 await MessageHandler.Pron(botClient, message);

@@ -5,6 +5,3 @@ select
 	,[Excel].[dbo].[Dict].[Rus]
 	,'non'
 from [Excel].[dbo].[Dict]
-
-
-

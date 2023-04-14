@@ -15,6 +15,7 @@ internal static class ErrorHandler
             _ => exception.ToString()
         };
         logger.Fatal(errorMessage);
+        Console.WriteLine(errorMessage);
         return Task.CompletedTask;
     }
 }
