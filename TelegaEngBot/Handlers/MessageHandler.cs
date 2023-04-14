@@ -36,10 +36,13 @@ internal static class MessageHandler
         _keyboard3Btn = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true};
     }
 
-    internal static async Task Start(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    internal static async Task Start(ITelegramBotClient botClient, 
+        Message message, 
+        AppDbContext dbContext, 
+        AppUser user)
     {
         InitiateKeyboard();
-        await GetNewWord(botClient, message, dbContext);
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
     internal static async Task Know(ITelegramBotClient botClient,
@@ -74,7 +77,7 @@ internal static class MessageHandler
             }
         }
 
-        await GetNewWord(botClient, message, dbContext);
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
     internal static async Task NotKnow(ITelegramBotClient botClient,
@@ -106,7 +109,7 @@ internal static class MessageHandler
             }
         }
 
-        await GetNewWord(botClient, message, dbContext);
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
     internal static async Task Pron(ITelegramBotClient botClient, Message message)
@@ -117,12 +120,21 @@ internal static class MessageHandler
             replyMarkup: _keyboard2Btn);
     }
 
-    private static async Task GetNewWord(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    private static async Task GetNewWord(ITelegramBotClient botClient, 
+        Message message, 
+        AppDbContext dbContext,
+        AppUser user)
     {
-        var rnd = new Random();
-        var rndWord = rnd.Next(0, dbContext.CommonVocabulary.Count());
-        _article = dbContext.CommonVocabulary.Skip(rndWord).Take(1).FirstOrDefault();
-        await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
+        try
+        {
+            _article = WeightedRandomSelector.SelectArticle(user.TotalArticlesWeight, user.UserVocabulary).Article;
+            await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            // add log
+        }
 
         // Checking if the keyboard is initialized
         if (_keyboard2Btn == null || _keyboard3Btn == null) InitiateKeyboard();

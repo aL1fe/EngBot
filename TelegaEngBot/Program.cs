@@ -26,7 +26,7 @@ class Program
             Seeder.Seed(_dbContext); //todo
             //return;
         }
-        
+
         var userVocabulary = _dbContext.CommonVocabulary;
 
         // TelegramBot init
@@ -50,8 +50,8 @@ class Program
 
     private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        if (update.Type == UpdateType.Message 
-            && update.Message?.Text != null 
+        if (update.Type == UpdateType.Message
+            && update.Message?.Text != null
             && update.Message.From != null)
             await HandleMessage(botClient, update.Message);
     }
@@ -71,8 +71,9 @@ class Program
 
         //var commonVac = _dbContext.CommonVocabulary;
         var userList = _dbContext.UserList
-            .Where(x=>x.TelegramUserId == message.From.Id)
-            .Include(x => x.UserVocabulary)
+            .Where(x => x.TelegramUserId == message.From.Id)
+            .Include(x => x.UserVocabulary)!
+                .ThenInclude(y => y.Article)
             .Include(x => x.UserSettings);
         var user = userList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
 
@@ -86,7 +87,7 @@ class Program
         switch (message.Text)
         {
             case "/start":
-                await MessageHandler.Start(botClient, message, _dbContext);
+                await MessageHandler.Start(botClient, message, _dbContext, user);
                 break;
             case "Know":
                 await MessageHandler.Know(botClient, message, _dbContext, user);
