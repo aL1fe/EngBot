@@ -61,9 +61,8 @@ internal static class MessageHandler
                     await dbContext.SaveChangesAsync();
                 }
 
-                // if (user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
-                //     await botClient.SendTextMessageAsync(message.Chat.Id,
-                //         char.ConvertFromUtf32(0x1F642));
+                if (user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
                 _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
                               _article.RusWord);
@@ -94,8 +93,8 @@ internal static class MessageHandler
                 user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                 await dbContext.SaveChangesAsync();
 
-                // if (user.UserSettings.IsSmileOn) //Sad smile
-                //     await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
+                if (user.UserSettings.IsSmileOn) //Sad smile
+                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
                 _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
                                   _article.RusWord);

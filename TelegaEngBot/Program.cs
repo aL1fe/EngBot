@@ -15,7 +15,6 @@ namespace TelegaEngBot;
 class Program
 {
     private static AppDbContext _dbContext;
-    private static bool _isSmileOn = false;
     private static Logger _logger = LogManager.GetCurrentClassLogger();
 
     static async Task Main()
@@ -70,7 +69,7 @@ class Program
             return;
         }
 
-        var commonVac = _dbContext.CommonVocabulary;
+        //var commonVac = _dbContext.CommonVocabulary;
         var userList = _dbContext.UserList
             .Where(x=>x.TelegramUserId == message.From.Id)
             .Include(x => x.UserVocabulary)
@@ -99,7 +98,7 @@ class Program
                 await MessageHandler.Pron(botClient, message);
                 break;
             case "/smile":
-                _isSmileOn = !_isSmileOn; //todo
+                user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                 break;
             case "/pronunciation":
                 MessageHandler.IsPronunciationOn = !MessageHandler.IsPronunciationOn; //todo
