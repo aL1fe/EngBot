@@ -19,8 +19,7 @@ internal static class MessageHandler
     private static KeyboardButton? _btnUsPron;
     private static ReplyKeyboardMarkup? _keyboard2Btn;
     private static ReplyKeyboardMarkup? _keyboard3Btn;
-    private static Logger _logger = LogManager.GetCurrentClassLogger();
-    internal static bool IsPronunciationOn = false;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private static void InitiateKeyboard()
     {
@@ -68,7 +67,7 @@ internal static class MessageHandler
                 if (user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
                     await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
+                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
                               _article.RusWord);
             }
             catch (Exception e)
@@ -100,7 +99,7 @@ internal static class MessageHandler
                 if (user.UserSettings.IsSmileOn) //Sad smile
                     await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
+                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
                                   _article.RusWord);
             }
             catch (Exception e)
@@ -140,12 +139,17 @@ internal static class MessageHandler
         // Checking if the keyboard is initialized
         if (_keyboard2Btn == null || _keyboard3Btn == null) InitiateKeyboard();
 
-        await RedrawKeyboard(botClient, message, true);
+        await RedrawKeyboard(botClient, message, true, user);
     }
 
-    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, Message message, bool ifTypeWord)
+    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, 
+        Message message, 
+        bool ifTypeWord,
+        AppUser user)
     {
-        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && IsPronunciationOn)
+        if (_article == null) return;
+        
+        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -164,7 +168,7 @@ internal static class MessageHandler
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "Button \"Pronunciation\" is " + (IsPronunciationOn ? "On" : "Off"),
+                    "Button \"Pronunciation\" is " + (user.UserSettings.IsPronunciationOn ? "On" : "Off"),
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
         }
     }

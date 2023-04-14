@@ -1,6 +1,7 @@
 ﻿using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 using Telegram.Bot.Types;
+#pragma warning disable CS8602
 
 namespace TelegaEngBot.Services;
 

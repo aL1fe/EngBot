@@ -9,13 +9,15 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+#pragma warning disable CS8618
+#pragma warning disable CS8602
 
 namespace TelegaEngBot;
 
 class Program
 {
     private static AppDbContext _dbContext;
-    private static Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     static async Task Main()
     {
@@ -42,17 +44,15 @@ class Program
             );
 
             var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
-            _logger.Info("Start listening for @" + me.Username + ".");
+            Logger.Info("Start listening for @" + me.Username + ".");
             Console.WriteLine("Start listening for @" + me.Username);
         }
         else
-        {
-            _logger.Fatal("Bot token not found.");
-        }
+            Logger.Fatal("Bot token not found.");
 
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
-        _logger.Info("Stop program.");
+        Logger.Info("Stop listening bot.");
     }
 
     private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -65,18 +65,15 @@ class Program
 
     private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
     {
-        //Check authorization
         if (!IdentityServer.CheckAuth(message.From.Id))
         {
             await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
-            _logger.Info("New user tried to connect. User Id: " + message.From.Id
-                                                                + " Username: " + message.From.Username
-                                                                + " FirstName: " + message.From.FirstName
-                                                                + " LastName: " + message.From.LastName);
+            Logger.Info("New user tried to connect. User Id: "
+                        + message.From.Id + " Username: " + message.From.Username 
+                        + " FirstName: " + message.From.FirstName + " LastName: " + message.From.LastName);
             return;
         }
 
-        //var commonVac = _dbContext.CommonVocabulary;
         var userList = _dbContext.UserList
             .Where(x => x.TelegramUserId == message.From.Id)
             .Include(x => x.UserVocabulary)!
@@ -109,8 +106,9 @@ class Program
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                 break;
             case "/pronunciation":
-                MessageHandler.IsPronunciationOn = !MessageHandler.IsPronunciationOn; //todo
-                await MessageHandler.RedrawKeyboard(botClient, message, false);
+                break; // todo
+                user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
+                await MessageHandler.RedrawKeyboard(botClient, message, false, user);
                 break;
         }
     }
