@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NLog;
+﻿using NLog;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 using TelegaEngBot.Services;
@@ -7,6 +6,8 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+#pragma warning disable CS8604
+#pragma warning disable CS8602
 
 namespace TelegaEngBot.Handlers;
 

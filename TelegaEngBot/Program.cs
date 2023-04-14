@@ -23,28 +23,35 @@ class Program
         if (!_dbContext.CommonVocabulary.Any())
         {
             Console.WriteLine("Database is empty.");
-            Seeder.Seed(_dbContext); //todo
-            //return;
+            //Seeder.Seed(_dbContext);
+            return;
         }
 
-        var userVocabulary = _dbContext.CommonVocabulary;
-
         // TelegramBot init
-        var botClient = new TelegramBotClient(AppConfig.BotToken);
-        using var cts = new CancellationTokenSource();
-        var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
-        botClient.StartReceiving(
-            HandleUpdate,
-            ErrorHandler.HandleError,
-            receiverOptions,
-            cancellationToken: cts.Token
-        );
+        var botToken = AppConfig.BotToken;
+        if (botToken != null)
+        {
+            var botClient = new TelegramBotClient(botToken);
+            using var cts = new CancellationTokenSource();
+            var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
+            botClient.StartReceiving(
+                HandleUpdate,
+                ErrorHandler.HandleError,
+                receiverOptions,
+                cancellationToken: cts.Token
+            );
 
-        var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
-        _logger.Info("Start listening for @" + me.Username + ".");
-        Console.WriteLine("Start listening for @" + me.Username);
+            var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
+            _logger.Info("Start listening for @" + me.Username + ".");
+            Console.WriteLine("Start listening for @" + me.Username);
+        }
+        else
+        {
+            _logger.Fatal("Bot token not found.");
+        }
 
-        Console.ReadLine();
+        Console.WriteLine("Press any key to exit...");
+        Console.ReadKey();
         _logger.Info("Stop program.");
     }
 
