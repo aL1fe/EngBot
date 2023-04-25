@@ -48,7 +48,7 @@ internal static class MessageHandler
     internal static async Task Know(ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
-        AppUser user) // изменить на юзерский
+        AppUser user)
     {
         if (_article != null)
         {
@@ -59,7 +59,6 @@ internal static class MessageHandler
                 if (userArticle.Weight > 1)
                 {
                     userArticle.Weight--;
-                    //user.TotalArticlesWeight--;
                     user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                     await dbContext.SaveChangesAsync();
                 }
@@ -73,7 +72,7 @@ internal static class MessageHandler
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log
+                // add log todo
             }
         }
 
@@ -92,7 +91,6 @@ internal static class MessageHandler
                 var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
 
                 userArticle.Weight++;
-                //user.TotalArticlesWeight++;
                 user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                 await dbContext.SaveChangesAsync();
 
@@ -105,7 +103,7 @@ internal static class MessageHandler
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log
+                // add log todo
             }
         }
 
@@ -127,13 +125,14 @@ internal static class MessageHandler
     {
         try
         {
+            //if SynchroniseVocabularies todo
             _article = WeightedRandomSelector.SelectArticle(user.TotalArticlesWeight, user.UserVocabulary).Article;
             await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            // add log
+            // add log todo
         }
 
         // Checking if the keyboard is initialized

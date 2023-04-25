@@ -36,10 +36,12 @@ public class UserService
         return user;
     }
 
+    //todo
     public void ChangeUserVocabulary(int userId)
     {
     }
 
+    //todo
     public void ResetWeightUserVocabulary(int userId)
     {
     }

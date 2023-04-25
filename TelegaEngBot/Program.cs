@@ -42,6 +42,8 @@ class Program
                 receiverOptions,
                 cancellationToken: cts.Token
             );
+            
+            //await botClient.SendTextMessageAsync(450056320, "Press /start to begin.", cancellationToken: cts.Token);
 
             var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
             Logger.Info("Start listening for @" + me.Username + ".");
@@ -53,6 +55,8 @@ class Program
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
         Logger.Info("Stop listening bot.");
+        Console.WriteLine("Stop listening bot.");
+        await Task.Delay(1000);
     }
 
     private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -67,8 +71,10 @@ class Program
     {
         if (!IdentityServer.CheckAuth(message.From.Id))
         {
-            await botClient.SendTextMessageAsync(message.Chat.Id, "*Access denied.*", ParseMode.Markdown);
-            Logger.Info("New user tried to connect. User Id: "
+            await botClient.SendTextMessageAsync(message.Chat.Id, 
+                "*Access denied.* You should request access and then restart bot using the command //start", 
+                ParseMode.Markdown);
+            Logger.Warn("New user tried to connect. User Id: "
                         + message.From.Id + " Username: " + message.From.Username 
                         + " FirstName: " + message.From.FirstName + " LastName: " + message.From.LastName);
             return;
@@ -87,6 +93,10 @@ class Program
             user = userService.CreateUser(message.From.Id, message);
             message.Text = "/start";
         }
+        
+        //check unhandled updates (messages)
+        // var updates = await botClient.GetUpdatesAsync();
+        // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
         switch (message.Text)
         {
