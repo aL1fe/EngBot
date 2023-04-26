@@ -126,7 +126,7 @@ internal static class MessageHandler
         try
         {
             //if SynchroniseVocabularies todo
-            _article = WeightedRandomSelector.SelectArticle(user.TotalArticlesWeight, user.UserVocabulary).Article;
+            _article = WeightedRandomSelector.SelectArticle(user.UserVocabulary).Article;
             await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
         }
         catch (Exception e)

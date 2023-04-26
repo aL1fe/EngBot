@@ -22,12 +22,15 @@ class Program
     static async Task Main()
     {
         _dbContext = new AppDbContext();
-        if (!_dbContext.CommonVocabulary.Any())
-        {
-            Console.WriteLine("Database is empty.");
-            //Seeder.Seed(_dbContext);
-            return;
-        }
+        
+        // Check database is not empty
+        var check = new CheckDb(_dbContext);
+        check.CheckDbEmpty();
+        
+        // Check if "user vocabulary" match "common vocabulary"
+        check.MatchVocabulary();
+        
+        //return;
 
         // TelegramBot init
         var botToken = AppConfig.BotToken;
@@ -80,6 +83,7 @@ class Program
             return;
         }
 
+        // todo Maybe moov this block to the Main() check if it will work
         var userList = _dbContext.UserList
             .Where(x => x.TelegramUserId == message.From.Id)
             .Include(x => x.UserVocabulary)!
