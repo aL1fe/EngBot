@@ -25,7 +25,7 @@ public class UserService
             TelegramFirstName = message.From.FirstName,
             TelegramLastName = message.From.LastName,
             UserVocabulary = Context.CommonVocabulary
-                .Select(article => new UserVocabularyItem {Article = article, Weight = 1})
+                .Select(article => new UserVocabularyItem {Article = article, Weight = 10})
                 .ToList(),
             UserSettings = userSettings
         };
