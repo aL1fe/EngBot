@@ -55,8 +55,8 @@ class Program
         else
             Logger.Fatal("Bot token not found.");
 
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+        Console.WriteLine("Press \"Enter\" to exit...");
+        Console.Read();
         Logger.Info("Stop listening bot.");
         Console.WriteLine("Stop listening bot.");
         await Task.Delay(1000);
