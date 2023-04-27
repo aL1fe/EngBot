@@ -29,8 +29,7 @@ public class UserService
                 .ToList(),
             UserSettings = userSettings
         };
-        user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
-
+        
         Context.UserList.Add(user);
         Context.SaveChanges();
         return user;

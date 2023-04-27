@@ -59,7 +59,7 @@ internal static class MessageHandler
                 if (userArticle.Weight > 1)
                 {
                     userArticle.Weight--;
-                    user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
+                    // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                     await dbContext.SaveChangesAsync();
                 }
 
@@ -91,7 +91,7 @@ internal static class MessageHandler
                 var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
 
                 userArticle.Weight++;
-                user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
+                // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                 await dbContext.SaveChangesAsync();
 
                 if (user.UserSettings.IsSmileOn) //Sad smile
