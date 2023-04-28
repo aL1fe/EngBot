@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using TelegaEngBot.DataAccessLayer;
@@ -25,58 +26,56 @@ public class CheckDb
 
     public void MatchVocabulary()
     {
+        // Add context
         var userList = _dbContext.UserList
             .Include(x => x.UserVocabulary)!
                 .ThenInclude(y => y.Article)
             .Include(x => x.UserSettings);
-        
-        using var md5 = MD5.Create();
-        var guids = _dbContext.CommonVocabulary
+
+        // Get common vocabulary hash
+        var commonVocabularyGuids = _dbContext.CommonVocabulary
             .Select(x => x.Id)
             .ToArray();
-        Array.Sort(guids);
-            
-        var concatenatedInputs = string.Join("", guids);
-        var inputBytes = Encoding.UTF8.GetBytes(concatenatedInputs);
-        var commonVocabularyHash = md5.ComputeHash(inputBytes);
+        var commonVocabularyHash = GetHash(commonVocabularyGuids);
+        Console.WriteLine("CommonVoc " + PrintHash(commonVocabularyHash));
         
-        //
-        var sbCom = new StringBuilder();
-        foreach (var t in commonVocabularyHash)
-        {
-            sbCom.Append(t.ToString("x2"));
-        }
-        Console.WriteLine(sbCom);
-        //
-        
+        // Get user vocabulary hash
         foreach (var appUser in userList)
         {
             var userVocabularyGuids = appUser.UserVocabulary
                 .Select(x => x.Article)
                 .Select(x=>x.Id)
                 .ToArray();
-                
-            Array.Sort(userVocabularyGuids);
-            
-            var concatenatedUserInputs = string.Join("", userVocabularyGuids);
-            var inputUserBytes = Encoding.UTF8.GetBytes(concatenatedUserInputs);
-                
-            var userVocabularyHash = md5.ComputeHash(inputUserBytes);
-                
-            // Преобразуем массив байтов в строку
-            var sb = new StringBuilder();
-            foreach (var t in userVocabularyHash)
-            {
-                sb.Append(t.ToString("x2"));
-            }
-
-            Console.WriteLine(appUser.TelegramUserId + " " + sb);
+  
+            var userVocabularyHash = GetHash(userVocabularyGuids);
+            Console.WriteLine(appUser.TelegramUserId + " " + PrintHash(userVocabularyHash));
                 
             // if (commonVocabularyHash != userVocabularyHash)
             // {
             //     Console.WriteLine("not match");
             // }
         }
+    }
+
+    private static byte[] GetHash(Guid[] guids)
+    {
+        Array.Sort(guids);
+        
+        using var md5 = MD5.Create();
+        var concatenatedInputs = string.Join("", guids);
+        var inputBytes = Encoding.UTF8.GetBytes(concatenatedInputs);
+        var hash = md5.ComputeHash(inputBytes);
+        return hash;
+    }
+
+    private static ISerializable PrintHash(byte[] hash)
+    {
+        var sb = new StringBuilder();
+        foreach (var t in hash)
+        {
+            sb.Append(t.ToString("x2"));
+        }
+        return sb;
     }
     
 }
