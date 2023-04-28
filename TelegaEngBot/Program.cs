@@ -112,13 +112,26 @@ class Program
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
+                await _dbContext.SaveChangesAsync();
                 break;
             case "/sound":// "/pronunciation":
                 user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
+                await _dbContext.SaveChangesAsync();
                 await MessageHandler.RedrawKeyboard(botClient, message, false, user);
+                break;
+            case "/hard":
+                await MessageHandler.Hard(botClient, message, user);
                 break;
         }
     }
 }
 // https://t.me/my_aL1fe_bot
 // https://t.me/PhrasesAndWords_bot
+
+// Menu
+/*
+start - Restart
+smile - Smile On/Off
+pronunciation - Pronunciation On/Of
+hard - Show 20 hard-to-remember words
+*/

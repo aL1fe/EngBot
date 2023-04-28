@@ -171,4 +171,20 @@ internal static class MessageHandler
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
         }
     }
+
+    internal static async Task Hard(ITelegramBotClient botClient,
+        Message message,
+        AppUser user)
+    {
+        var hardWordList = user.UserVocabulary
+            .OrderByDescending(x => x.Weight)
+            .Take(20)
+            .Select(x => new { Article = x.Article, Weight = x.Weight })
+            .ToList();
+        foreach (var hardWord in hardWordList)
+        {
+            await botClient.SendTextMessageAsync(message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
+        }
+        await botClient.SendTextMessageAsync(message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+    }
 }
