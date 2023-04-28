@@ -83,13 +83,7 @@ class Program
             return;
         }
 
-        // todo Maybe moov this block to the Main() check if it will work
-        var userList = _dbContext.UserList
-            .Where(x => x.TelegramUserId == message.From.Id)
-            .Include(x => x.UserVocabulary)!
-                .ThenInclude(y => y.Article)
-            .Include(x => x.UserSettings);
-        var user = userList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
+        var user = _dbContext.UserList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
 
         if (user == null) // If null Create User in database
         {
@@ -119,13 +113,12 @@ class Program
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                 break;
-            case "/pronunciation":
-                break; // todo
+            case "/sound":// "/pronunciation":
                 user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
                 await MessageHandler.RedrawKeyboard(botClient, message, false, user);
                 break;
         }
     }
 }
-//https://t.me/my_aL1fe_bot
-//https://t.me/PhrasesAndWords_bot
+// https://t.me/my_aL1fe_bot
+// https://t.me/PhrasesAndWords_bot

@@ -27,7 +27,8 @@ public class CheckDb
     {
         var userList = _dbContext.UserList
             .Include(x => x.UserVocabulary)!
-            .ThenInclude(y => y.Article);
+                .ThenInclude(y => y.Article)
+            .Include(x => x.UserSettings);
         
         using var md5 = MD5.Create();
         var guids = _dbContext.CommonVocabulary
