@@ -20,8 +20,9 @@ public class CheckDb
     {
         if (_dbContext.CommonVocabulary.Any()) return;
         Console.WriteLine("Database is empty.");
-        Seeder.Seed(_dbContext);
-        Console.WriteLine("Database was seeded with test values.");
+        Environment.Exit(0);
+        // Seeder.Seed(_dbContext);
+        // Console.WriteLine("Database was seeded with test values.");
     }
 
     public void MatchVocabulary()
@@ -42,25 +43,38 @@ public class CheckDb
         // Get user vocabulary hash
         foreach (var appUser in userList)
         {
+            // if (appUser.TelegramUserId != 450056320) // todo delete this condition
+            //     break;
+            
             var userVocabularyGuids = appUser.UserVocabulary
                 .Select(x => x.Article)
                 .Select(x=>x.Id)
                 .ToArray();
   
             var userVocabularyHash = GetHash(userVocabularyGuids);
-            Console.WriteLine(appUser.TelegramUserId + " " + PrintHash(userVocabularyHash));
+            Console.Write(appUser.TelegramUserId + " " + PrintHash(userVocabularyHash));
                 
-            // if (commonVocabularyHash != userVocabularyHash)
-            // {
-            //     Console.WriteLine("not match");
-            // }
+            if (commonVocabularyHash != userVocabularyHash)
+            {
+                Console.WriteLine(" - not match");
+                // ReconcileData();
+            }
+            else
+            {
+                Console.WriteLine(" - match");
+            }
         }
+    }
+
+    private static void ReconcileData()
+    {
+        
     }
 
     private static byte[] GetHash(Guid[] guids)
     {
         Array.Sort(guids);
-        
+
         using var md5 = MD5.Create();
         var concatenatedInputs = string.Join("", guids);
         var inputBytes = Encoding.UTF8.GetBytes(concatenatedInputs);
