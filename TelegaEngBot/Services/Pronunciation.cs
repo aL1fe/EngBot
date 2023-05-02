@@ -32,3 +32,8 @@ internal static class Pronunciation
             await botClient.SendTextMessageAsync(message.Chat.Id, "*Cannot play sentences.*", ParseMode.Markdown);
     }
 }
+
+/* for testing
+greet
+
+*/
