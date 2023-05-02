@@ -1,11 +1,11 @@
 use Mnemonics;
 --begin tran
---	update Dictionary
+--	update CommonVocabulary
 --	set EngWord = TRIM(EngWord)
 --	where EngWord like ' %' or EngWord like '% '
 --rollback tran
 
 SELECT 
 	*
-FROM Dictionary
-where EngWord like '% '
+FROM CommonVocabulary
+where EngWord like ' %' or EngWord like '% '

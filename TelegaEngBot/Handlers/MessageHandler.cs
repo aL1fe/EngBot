@@ -6,19 +6,20 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+#pragma warning disable CS8604
+#pragma warning disable CS8602
 
 namespace TelegaEngBot.Handlers;
 
 internal static class MessageHandler
 {
-    private static Word? _word;
+    private static Article? _article;
     private static KeyboardButton? _btnKnow;
     private static KeyboardButton? _btnNotKnow;
     private static KeyboardButton? _btnUsPron;
     private static ReplyKeyboardMarkup? _keyboard2Btn;
     private static ReplyKeyboardMarkup? _keyboard3Btn;
-    private static Logger _logger = LogManager.GetCurrentClassLogger();
-    internal static bool IsPronunciationOn = false;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private static void InitiateKeyboard()
     {
@@ -35,69 +36,126 @@ internal static class MessageHandler
         _keyboard3Btn = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true};
     }
 
-    internal static async Task Start(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    internal static async Task Start(ITelegramBotClient botClient, 
+        Message message, 
+        AppDbContext dbContext, 
+        AppUser user)
     {
         InitiateKeyboard();
-        await GetNewWord(botClient, message, dbContext);
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
-    internal static async Task Know(ITelegramBotClient botClient, Message message, AppDbContext dbContext,
-        bool isSmileOn)
+    internal static async Task Know(ITelegramBotClient botClient,
+        Message message,
+        AppDbContext dbContext,
+        AppUser user)
     {
-        //TODO Increase weight
-        if (isSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
-            await botClient.SendTextMessageAsync(message.Chat.Id,
-                char.ConvertFromUtf32(0x1F642));
-        if (_word != null)
-            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
-        await GetNewWord(botClient, message, dbContext);
+        if (_article != null)
+        {
+            try
+            {
+                var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+
+                if (userArticle.Weight > 1)
+                {
+                    userArticle.Weight--;
+                    // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
+                    await dbContext.SaveChangesAsync();
+                }
+
+                if (user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F642));
+
+                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
+                              _article.RusWord);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                // add log todo
+            }
+        }
+
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
-    internal static async Task NotKnow(ITelegramBotClient botClient, Message message, AppDbContext dbContext,
-        bool isSmileOn)
+    internal static async Task NotKnow(ITelegramBotClient botClient,
+        Message message,
+        AppDbContext dbContext,
+        AppUser user)
     {
-        //TODO Decrease weight
-        if (isSmileOn) //Sad smile
-            await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
-        if (_word != null)
-            _logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _word.EngWord + ", RusWord: " + _word.RusWord);
-        await GetNewWord(botClient, message, dbContext);
+        if (_article != null)
+        {
+            try
+            {
+                var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+
+                userArticle.Weight++;
+                // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
+                await dbContext.SaveChangesAsync();
+
+                if (user.UserSettings.IsSmileOn) //Sad smile
+                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
+
+                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
+                                  _article.RusWord);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                // add log todo
+            }
+        }
+
+        await GetNewWord(botClient, message, dbContext, user);
     }
 
     internal static async Task Pron(ITelegramBotClient botClient, Message message)
     {
-        if (_word == null) return;
-        await Pronunciation.PronUs(botClient, message, _word);
+        if (_article == null) return;
+        await Pronunciation.PronUs(botClient, message, _article);
         await botClient.SendTextMessageAsync(message.Chat.Id, "Click play to listen.", ParseMode.Html,
             replyMarkup: _keyboard2Btn);
     }
 
-    private static async Task GetNewWord(ITelegramBotClient botClient, Message message, AppDbContext dbContext)
+    private static async Task GetNewWord(ITelegramBotClient botClient, 
+        Message message, 
+        AppDbContext dbContext,
+        AppUser user)
     {
-        var rnd = new Random();
-        var rndWord = rnd.Next(0, dbContext.Dictionary.Count());
-        _word = dbContext.Dictionary.Skip(rndWord).Take(1).FirstOrDefault();
-        await botClient.SendTextMessageAsync(message.Chat.Id, _word.RusWord);
-
-        // Checking if the keyboard is initialized
-        if (_keyboard2Btn == null || _keyboard3Btn == null)
+        try
         {
-            InitiateKeyboard();
+            //if SynchroniseVocabularies todo
+            _article = WeightedRandomSelector.SelectArticle(user.UserVocabulary).Article;
+            await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            // add log todo
         }
 
-        await RedrawKeyboard(botClient, message, true);
+        // Checking if the keyboard is initialized
+        if (_keyboard2Btn == null || _keyboard3Btn == null) InitiateKeyboard();
+
+        await RedrawKeyboard(botClient, message, true, user);
     }
 
-    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, Message message, bool ifTypeWord)
+    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, 
+        Message message, 
+        bool ifTypeWord,
+        AppUser user)
     {
-        if (Validator.ValidateAndTransform(_word.EngWord) != "error" && IsPronunciationOn)
+        if (_article == null) return;
+        
+        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
-                await botClient.SendTextMessageAsync(message.Chat.Id, 
-                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                await botClient.SendTextMessageAsync(message.Chat.Id,
+                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _keyboard3Btn);
             else
-                await botClient.SendTextMessageAsync(message.Chat.Id, 
+                await botClient.SendTextMessageAsync(message.Chat.Id,
                     "Click \"Pronunciation\" to listen word.",
                     ParseMode.Html, replyMarkup: _keyboard3Btn);
         }
@@ -105,12 +163,28 @@ internal static class MessageHandler
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "<tg-spoiler>" + _word.EngWord + "</tg-spoiler>",
+                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "Button \"Pronunciation\" is " + (IsPronunciationOn ? "On" : "Off"),
+                    "Button \"Pronunciation\" is " + (user.UserSettings.IsPronunciationOn ? "On" : "Off"),
                     ParseMode.Html, replyMarkup: _keyboard2Btn);
         }
+    }
+
+    internal static async Task Hard(ITelegramBotClient botClient,
+        Message message,
+        AppUser user)
+    {
+        var hardWordList = user.UserVocabulary
+            .OrderByDescending(x => x.Weight)
+            .Take(20)
+            .Select(x => new { Article = x.Article, Weight = x.Weight })
+            .ToList();
+        foreach (var hardWord in hardWordList)
+        {
+            await botClient.SendTextMessageAsync(message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
+        }
+        await botClient.SendTextMessageAsync(message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 }
