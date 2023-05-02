@@ -15,6 +15,6 @@ internal static class AppConfig
         _configuration = builder.Build();
     }
     
-    internal static string BotToken => _configuration.GetSection("BotToken")["TestBot"];
-    internal static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
+    internal static string? BotToken => _configuration.GetSection("BotToken")["TestBot"];
+    internal static string? ConnectionString => _configuration.GetConnectionString("DefaultConnection");
 }
