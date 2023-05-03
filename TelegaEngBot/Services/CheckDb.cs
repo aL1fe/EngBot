@@ -37,8 +37,8 @@ public class CheckDb
         // Get user vocabulary hash
         foreach (var appUser in _dbContext.UserList)
         {
-            // if (appUser.TelegramUserId != 450056320) // todo delete this condition
-            //     break;
+            if (appUser.TelegramUserId != 450056320) // todo delete this condition
+                continue;
             
             var userVocabularyGuids = appUser.UserVocabulary
                 .Select(x => x.Article)
