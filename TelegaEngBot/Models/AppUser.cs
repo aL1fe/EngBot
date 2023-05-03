@@ -7,6 +7,6 @@ public class AppUser
     public string? TelegramUserName { get; set; }
     public string? TelegramFirstName { get; set; }
     public string? TelegramLastName { get; set; }
-    public List<UserVocabularyItem>? UserVocabulary { get; set; }
-    public UserSettings UserSettings { get; set; } = null!;
+    public virtual List<UserVocabularyItem>? UserVocabulary { get; set; }
+    public virtual UserSettings UserSettings { get; set; } = null!;
 }

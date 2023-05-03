@@ -27,12 +27,6 @@ public class CheckDb
 
     public void MatchVocabulary()
     {
-        // Add context
-        var userList = _dbContext.UserList
-            .Include(x => x.UserVocabulary)!
-                .ThenInclude(y => y.Article)
-            .Include(x => x.UserSettings);
-
         // Get common vocabulary hash
         var commonVocabularyGuids = _dbContext.CommonVocabulary
             .Select(x => x.Id)
@@ -41,7 +35,7 @@ public class CheckDb
         Console.WriteLine("CommonVoc " + PrintHash(commonVocabularyHash));
         
         // Get user vocabulary hash
-        foreach (var appUser in userList)
+        foreach (var appUser in _dbContext.UserList)
         {
             // if (appUser.TelegramUserId != 450056320) // todo delete this condition
             //     break;
