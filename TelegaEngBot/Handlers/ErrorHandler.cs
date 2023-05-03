@@ -11,7 +11,12 @@ internal static class ErrorHandler
     {
         var errorMessage = exception switch
         {
-            ApiRequestException apiRequestException => $"Error code: {apiRequestException.ErrorCode} - {apiRequestException.Message}",
+            ApiRequestException apiRequestException =>
+                $"Telegram API error: {apiRequestException.ErrorCode} - {apiRequestException.Message}",
+            HttpRequestException httpException =>
+                $"HTTP request error: {httpException.Message}",
+            System.Net.Sockets.SocketException socketException =>
+                $"Network error: {socketException.Message}",
             _ => exception.ToString()
         };
         logger.Fatal(errorMessage);
