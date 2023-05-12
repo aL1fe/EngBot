@@ -13,7 +13,6 @@ internal static class Parser
         var htmlDoc = web.Load(uri);
         const string str = "//audio[contains(@class, 'hdn')]//source";
         
-        //TODO сделать проверку что найдено только 2 значения, значит нужного значения нет
         foreach (var node in htmlDoc.DocumentNode.SelectNodes(str))
         {
             var res = node.GetAttributeValue("src", null);

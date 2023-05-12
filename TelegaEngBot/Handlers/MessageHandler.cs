@@ -72,7 +72,7 @@ internal static class MessageHandler
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log todo
+                Logger.Error(e);
             }
         }
 
@@ -103,7 +103,7 @@ internal static class MessageHandler
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log todo
+                Logger.Error(e);
             }
         }
 
