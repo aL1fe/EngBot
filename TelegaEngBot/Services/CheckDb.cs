@@ -1,7 +1,6 @@
 ﻿using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 using NLog;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
@@ -61,10 +60,6 @@ public class CheckDb
             {
                 Console.WriteLine(" - not match");
                 SyncVocabularies(appUser);
-                Logger.Info("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
-                            appUser.TelegramUserId);
-                Console.WriteLine("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
-                                  appUser.TelegramUserId);
             }
             else
             {
@@ -75,6 +70,7 @@ public class CheckDb
 
     private void SyncVocabularies(AppUser appUser)
     {
+        // Add item from CommonVocabulary to UserVocabulary
         foreach (var article in _dbContext.CommonVocabulary)
         {
             if (appUser.UserVocabulary.Any(x => x.Article == article))
@@ -82,6 +78,33 @@ public class CheckDb
             appUser.UserVocabulary.Add(new UserVocabularyItem {Article = article, Weight = 10});
             _dbContext.SaveChanges();
         }
+        
+        // todo test it
+        // Delete item from UserVocabulary if they are not in CommonVocabulary
+        // foreach (var item in appUser.UserVocabulary.ToList())
+        // {
+        //     if (_dbContext.CommonVocabulary.Contains(item.Article))
+        //         continue;
+        //     appUser.UserVocabulary.Remove(item);
+        //     _dbContext.SaveChanges();
+        // }
+        Logger.Info("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
+                    appUser.TelegramUserId);
+        Console.WriteLine("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
+                          appUser.TelegramUserId);
+    }
+    
+    private void ParallelSyncVocabularies(AppUser appUser)
+    {
+        Parallel.ForEach(_dbContext.CommonVocabulary, article =>
+        {
+            if (appUser.UserVocabulary.All(x => x.Article != article))
+            {
+                appUser.UserVocabulary.Add(new UserVocabularyItem {Article = article, Weight = 10});
+            }
+        });
+
+        _dbContext.SaveChanges();
     }
 
     private static byte[] GetHash(Guid[] guids)
