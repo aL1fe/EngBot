@@ -26,11 +26,9 @@ class Program
         // Check database is not empty
         var check = new CheckDb(_dbContext);
         check.CheckDbEmpty();
-        
+
         // Check if "user vocabulary" match "common vocabulary"
         check.MatchVocabulary();
-        
-        //return;
 
         // TelegramBot init
         var botToken = AppConfig.BotToken;

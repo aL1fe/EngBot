@@ -15,7 +15,8 @@ internal static class Pronunciation
         var engWordTransform = Validator.ValidateAndTransform(article.EngWord);
         if (engWordTransform != "error")
         {
-            var uri = Parser.ParsHtml(engWordTransform);
+            var parser = new Parser();
+            var uri = parser.ParsHtml(engWordTransform);
 
             try
             {

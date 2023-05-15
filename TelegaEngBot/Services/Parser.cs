@@ -2,18 +2,17 @@
 
 namespace TelegaEngBot.Services;
 
-internal static class Parser
+internal class Parser
 {
-    internal static string? ParsHtml(string engWord)
+    internal string ParsHtml(string engWord)
     {
-        var listUris = new List<string?>(10);
+        var listUris = new List<string>(10);
 
         var uri = @"https://dictionary.cambridge.org/dictionary/english/" + engWord;
         var web = new HtmlWeb();
         var htmlDoc = web.Load(uri);
         const string str = "//audio[contains(@class, 'hdn')]//source";
         
-        //TODO сделать проверку что найдено только 2 значения, значит нужного значения нет
         foreach (var node in htmlDoc.DocumentNode.SelectNodes(str))
         {
             var res = node.GetAttributeValue("src", null);
