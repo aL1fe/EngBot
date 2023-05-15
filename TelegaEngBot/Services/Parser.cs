@@ -4,9 +4,9 @@ namespace TelegaEngBot.Services;
 
 internal class Parser
 {
-    internal string? ParsHtml(string engWord)
+    internal string ParsHtml(string engWord)
     {
-        var listUris = new List<string?>(10);
+        var listUris = new List<string>(10);
 
         var uri = @"https://dictionary.cambridge.org/dictionary/english/" + engWord;
         var web = new HtmlWeb();

@@ -4,7 +4,7 @@ namespace TelegaEngBot.Services;
 
 public class WeightedRandomSelector
 {
-    internal static UserVocabularyItem? SelectArticle(List<UserVocabularyItem> userVocabulary)
+    internal static UserVocabularyItem SelectArticle(List<UserVocabularyItem> userVocabulary)
     {
         var maxWeight = userVocabulary.Sum(x => x.Weight);
         var random = new Random();

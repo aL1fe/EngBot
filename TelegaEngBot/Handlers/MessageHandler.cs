@@ -13,12 +13,12 @@ namespace TelegaEngBot.Handlers;
 
 internal static class MessageHandler
 {
-    private static Article? _article;
-    private static KeyboardButton? _btnKnow;
-    private static KeyboardButton? _btnNotKnow;
-    private static KeyboardButton? _btnUsPron;
-    private static ReplyKeyboardMarkup? _keyboard2Btn;
-    private static ReplyKeyboardMarkup? _keyboard3Btn;
+    private static Article _article;
+    private static KeyboardButton _btnKnow;
+    private static KeyboardButton _btnNotKnow;
+    private static KeyboardButton _btnUsPron;
+    private static ReplyKeyboardMarkup _keyboard2Btn;
+    private static ReplyKeyboardMarkup _keyboard3Btn;
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private static void InitiateKeyboard()
