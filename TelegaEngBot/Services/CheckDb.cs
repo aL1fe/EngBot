@@ -78,16 +78,15 @@ public class CheckDb
             appUser.UserVocabulary.Add(new UserVocabularyItem {Article = article, Weight = 10});
             _dbContext.SaveChanges();
         }
-        
-        // todo test it
+
         // Delete item from UserVocabulary if they are not in CommonVocabulary
-        // foreach (var item in appUser.UserVocabulary.ToList())
-        // {
-        //     if (_dbContext.CommonVocabulary.Contains(item.Article))
-        //         continue;
-        //     appUser.UserVocabulary.Remove(item);
-        //     _dbContext.SaveChanges();
-        // }
+        foreach (var item in appUser.UserVocabulary.ToList())
+        {
+            if (_dbContext.CommonVocabulary.Contains(item.Article))
+                continue;
+            appUser.UserVocabulary.Remove(item);
+            _dbContext.SaveChanges();
+        }
         Logger.Info("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
                     appUser.TelegramUserId);
         Console.WriteLine("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
