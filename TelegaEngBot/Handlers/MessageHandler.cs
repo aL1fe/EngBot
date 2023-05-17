@@ -148,7 +148,7 @@ internal static class MessageHandler
     {
         if (_article == null) return;
         
-        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && user.UserSettings.IsPronunciationOn)
+        if (Validator.Normalize(_article.EngWord) != "error" && user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
