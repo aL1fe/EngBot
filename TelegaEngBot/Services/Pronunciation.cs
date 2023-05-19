@@ -12,11 +12,11 @@ internal static class Pronunciation
 
     internal static async Task PronUs(ITelegramBotClient botClient, Message message, Article article)
     {
-        var engWordTransform = Validator.Normalize(article.EngWord);
-        if (engWordTransform != "error")
+        var engWordNormalized  = Validator.Normalize(article.EngWord);
+        if (engWordNormalized != "error")
         {
             var parser = new Parser();
-            var uri = parser.ParsHtml(engWordTransform);
+            var uri = parser.ParsHtml(engWordNormalized);
 
             try
             {
