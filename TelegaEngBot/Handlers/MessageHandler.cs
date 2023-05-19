@@ -16,24 +16,24 @@ internal static class MessageHandler
     private static Article _article;
     private static KeyboardButton _btnKnow;
     private static KeyboardButton _btnNotKnow;
-    private static KeyboardButton _btnUsPron;
-    private static ReplyKeyboardMarkup _keyboard2Btn;
-    private static ReplyKeyboardMarkup _keyboard3Btn;
+    private static KeyboardButton _btnPron;
+    private static ReplyKeyboardMarkup _stdKbd;
+    private static ReplyKeyboardMarkup _extKbdPron;
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private static void InitiateKeyboard()
     {
         _btnKnow = new KeyboardButton("Know");
         _btnNotKnow = new KeyboardButton("Don't know");
-        _btnUsPron = new KeyboardButton("Pronunciation");
+        _btnPron = new KeyboardButton("Pronunciation");
 
         // Create rows
         var row1 = new[] {_btnKnow, _btnNotKnow};
-        var row2 = new[] {_btnUsPron};
+        var row2 = new[] {_btnPron};
 
         // Keyboards
-        _keyboard2Btn = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true};
-        _keyboard3Btn = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true};
+        _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
+        _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
     }
 
     internal static async Task Start(ITelegramBotClient botClient, 
@@ -115,7 +115,7 @@ internal static class MessageHandler
         if (_article == null) return;
         await Pronunciation.PronUs(botClient, message, _article);
         await botClient.SendTextMessageAsync(message.Chat.Id, "Click play to listen.", ParseMode.Html,
-            replyMarkup: _keyboard2Btn);
+            replyMarkup: _stdKbd);
     }
 
     private static async Task GetNewWord(ITelegramBotClient botClient, 
@@ -136,7 +136,7 @@ internal static class MessageHandler
         }
 
         // Checking if the keyboard is initialized
-        if (_keyboard2Btn == null || _keyboard3Btn == null) InitiateKeyboard();
+        if (_stdKbd == null || _extKbdPron == null) InitiateKeyboard();
 
         await RedrawKeyboard(botClient, message, true, user);
     }
@@ -153,22 +153,22 @@ internal static class MessageHandler
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
                     "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _keyboard3Btn);
+                    ParseMode.Html, replyMarkup: _extKbdPron);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id,
                     "Click \"Pronunciation\" to listen word.",
-                    ParseMode.Html, replyMarkup: _keyboard3Btn);
+                    ParseMode.Html, replyMarkup: _extKbdPron);
         }
         else
         {
             if (ifTypeWord)
                 await botClient.SendTextMessageAsync(message.Chat.Id,
                     "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _keyboard2Btn);
+                    ParseMode.Html, replyMarkup: _stdKbd);
             else
                 await botClient.SendTextMessageAsync(message.Chat.Id,
                     "Button \"Pronunciation\" is " + (user.UserSettings.IsPronunciationOn ? "On" : "Off"),
-                    ParseMode.Html, replyMarkup: _keyboard2Btn);
+                    ParseMode.Html, replyMarkup: _stdKbd);
         }
     }
 
