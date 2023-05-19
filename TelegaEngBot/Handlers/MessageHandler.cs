@@ -6,8 +6,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-#pragma warning disable CS8604
-#pragma warning disable CS8602
 
 namespace TelegaEngBot.Handlers;
 
@@ -17,15 +15,13 @@ public class MessageHandler
     private Message _message;
     private AppDbContext _dbContext;
     private AppUser _user;
-    
-    //private Article _article;
 
     private KeyboardButton _btnKnow;
     private KeyboardButton _btnNotKnow;
     private KeyboardButton _btnPron;
     private ReplyKeyboardMarkup _stdKbd;
     private ReplyKeyboardMarkup _extKbdPron;
-    private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public MessageHandler(ITelegramBotClient botClient,
         Message message,
@@ -78,13 +74,13 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
                               article.RusWord);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                Logger.Error(e);
+                _logger.Error(e);
             }
         }
 
@@ -107,13 +103,13 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Sad smile
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
                                   article.RusWord);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                Logger.Error(e);
+                _logger.Error(e);
             }
         }
 
