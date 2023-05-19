@@ -6,7 +6,9 @@ namespace TelegaEngBot.Handlers;
 
 internal static class ErrorHandler
 {
-    static Logger logger = LogManager.GetCurrentClassLogger();
+    private static Logger _logger = LogManager.GetCurrentClassLogger();
+    private static string _lastErrorMessage = string.Empty;
+    private static DateTime _lastErrorTimestamp = DateTime.MinValue;
 
     internal static Task HandleError(ITelegramBotClient client, Exception exception, CancellationToken ct)
     {
@@ -20,11 +22,20 @@ internal static class ErrorHandler
                 $"Network error: {socketException.Message}",
             System.Net.Http.HttpRequestException httpException =>
                 $"HTTP request error: {httpException.Message}",
+            System.Threading.Tasks.TaskCanceledException taskCanceledException =>
+                $"The request was canceled: {taskCanceledException.Message}",
             _ => exception.ToString()
         };
 
-        logger.Warn(errorMessage);
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ms") + " " + errorMessage);
+        if (errorMessage != _lastErrorMessage || (DateTime.Now - _lastErrorTimestamp).TotalSeconds >= 1)
+        {
+            _lastErrorMessage = errorMessage;
+            _lastErrorTimestamp = DateTime.Now;
+
+            _logger.Warn(errorMessage);
+            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ms") + " " + errorMessage);
+        }
+        
         return Task.CompletedTask;
     }
 }

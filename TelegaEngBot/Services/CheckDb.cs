@@ -40,8 +40,8 @@ public class CheckDb
         // Get user vocabulary hash
         foreach (var appUser in _dbContext.UserList)
         {
-            if (appUser.TelegramUserId != 450056320) // todo delete this condition
-                continue;
+            // if (appUser.TelegramUserId != 450056320) // todo delete this condition
+            //     continue;
 
             // if (!appUser.isVocabSync) // todo add new property to AppUser and add check it in code
             // {

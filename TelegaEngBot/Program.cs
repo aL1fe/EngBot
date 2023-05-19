@@ -9,8 +9,6 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-#pragma warning disable CS8618
-#pragma warning disable CS8602
 
 namespace TelegaEngBot;
 
@@ -35,6 +33,8 @@ class Program
         if (botToken != null)
         {
             var botClient = new TelegramBotClient(botToken);
+            //var botClient = new TelegramBotClient("6051962495:AAGqNcy-Li67m4IE6E1XpU8MGlS6e8Q6f0s"); // testBot
+
             using var cts = new CancellationTokenSource();
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(
@@ -70,7 +70,9 @@ class Program
 
     private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
     {
-        if (!IdentityServer.CheckAuth(message.From.Id))
+        // Identity
+        var identity = new IdentityServer(message.From.Id);
+        if (!identity.CheckAuth())
         {
             await botClient.SendTextMessageAsync(message.Chat.Id, 
                 "*Access denied.* You should request access and then restart bot using the command //start", 
@@ -82,7 +84,6 @@ class Program
         }
 
         var user = _dbContext.UserList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
-
         if (user == null) // If null Create User in database
         {
             var userService = new UserService(_dbContext);
@@ -90,23 +91,25 @@ class Program
             message.Text = "/start";
         }
         
+        //todo make check if last message is processed
         //check unhandled updates (messages)
         // var updates = await botClient.GetUpdatesAsync();
         // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
+        var messageHandler = new MessageHandler(botClient, message, _dbContext, user);
         switch (message.Text)
         {
             case "/start":
-                await MessageHandler.Start(botClient, message, _dbContext, user);
+                await messageHandler.Start();
                 break;
             case "Know":
-                await MessageHandler.Know(botClient, message, _dbContext, user);
+                await messageHandler.Know();
                 break;
             case "Don't know":
-                await MessageHandler.NotKnow(botClient, message, _dbContext, user);
+                await messageHandler.NotKnow();
                 break;
             case "Pronunciation":
-                await MessageHandler.Pron(botClient, message);
+                await messageHandler.Pron();
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
@@ -115,10 +118,10 @@ class Program
             case "/sound":// "/pronunciation":
                 user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
                 await _dbContext.SaveChangesAsync();
-                await MessageHandler.RedrawKeyboard(botClient, message, false, user);
+                await messageHandler.RedrawKeyboard(false);
                 break;
             case "/hard":
-                await MessageHandler.Hard(botClient, message, user);
+                await messageHandler.Hard();
                 break;
         }
     }
