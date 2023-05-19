@@ -32,7 +32,16 @@ class Program
         var botToken = AppConfig.BotToken;
         if (botToken != null)
         {
-            var botClient = new TelegramBotClient(botToken);
+            
+            
+            
+            
+            //var botClient = new TelegramBotClient(botToken);
+            var botClient = new TelegramBotClient("6051962495:AAGqNcy-Li67m4IE6E1XpU8MGlS6e8Q6f0s");
+            
+            
+            
+            
             using var cts = new CancellationTokenSource();
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(
@@ -94,19 +103,20 @@ class Program
         // var updates = await botClient.GetUpdatesAsync();
         // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
+        var messageHandler = new MessageHandler(botClient, message, _dbContext, user);
         switch (message.Text)
         {
             case "/start":
-                await MessageHandler.Start(botClient, message, _dbContext, user);
+                await messageHandler.Start();
                 break;
             case "Know":
-                await MessageHandler.Know(botClient, message, _dbContext, user);
+                await messageHandler.Know();
                 break;
             case "Don't know":
-                await MessageHandler.NotKnow(botClient, message, _dbContext, user);
+                await messageHandler.NotKnow();
                 break;
             case "Pronunciation":
-                await MessageHandler.Pron(botClient, message);
+                await messageHandler.Pron();
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
@@ -115,10 +125,10 @@ class Program
             case "/sound":// "/pronunciation":
                 user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
                 await _dbContext.SaveChangesAsync();
-                await MessageHandler.RedrawKeyboard(botClient, message, false, user);
+                await messageHandler.RedrawKeyboard(false);
                 break;
             case "/hard":
-                await MessageHandler.Hard(botClient, message, user);
+                await messageHandler.Hard();
                 break;
         }
     }
