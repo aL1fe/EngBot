@@ -32,16 +32,9 @@ class Program
         var botToken = AppConfig.BotToken;
         if (botToken != null)
         {
-            
-            
-            
-            
-            //var botClient = new TelegramBotClient(botToken);
-            var botClient = new TelegramBotClient("6051962495:AAGqNcy-Li67m4IE6E1XpU8MGlS6e8Q6f0s");
-            
-            
-            
-            
+            var botClient = new TelegramBotClient(botToken);
+            //var botClient = new TelegramBotClient("6051962495:AAGqNcy-Li67m4IE6E1XpU8MGlS6e8Q6f0s"); // testBot
+
             using var cts = new CancellationTokenSource();
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(

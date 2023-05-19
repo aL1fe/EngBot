@@ -18,7 +18,8 @@ public class MessageHandler
     private AppDbContext _dbContext;
     private AppUser _user;
     
-    private Article _article;
+    //private Article _article;
+
     private KeyboardButton _btnKnow;
     private KeyboardButton _btnNotKnow;
     private KeyboardButton _btnPron;
@@ -60,11 +61,12 @@ public class MessageHandler
 
     internal async Task Know()
     {
-        if (_article != null)
+        var article = _user.LastArticle;
+        if (article != null)
         {
             try
             {
-                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
                 if (userArticle.Weight > 1)
                 {
@@ -76,8 +78,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
-                              _article.RusWord);
+                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                              article.RusWord);
             }
             catch (Exception e)
             {
@@ -91,11 +93,12 @@ public class MessageHandler
 
     internal async Task NotKnow()
     {
-        if (_article != null)
+        var article = _user.LastArticle;
+        if (article != null)
         {
             try
             {
-                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
                 userArticle.Weight++;
                 // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
@@ -104,8 +107,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Sad smile
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
-                                  _article.RusWord);
+                Logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                                  article.RusWord);
             }
             catch (Exception e)
             {
@@ -119,8 +122,9 @@ public class MessageHandler
 
     internal async Task Pron()
     {
-        if (_article == null) return;
-        await Pronunciation.PronUs(_botClient, _message, _article);
+        var article = _user.LastArticle;
+        if (article == null) return;
+        await Pronunciation.PronUs(_botClient, _message, article);
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "Click play to listen.", ParseMode.Html,
             replyMarkup: _stdKbd);
     }
@@ -130,8 +134,10 @@ public class MessageHandler
         try
         {
             //if SynchroniseVocabularies todo
-            _article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, _article.RusWord);
+            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
+            _user.LastArticle = article;
+            await _dbContext.SaveChangesAsync();
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
         }
         catch (Exception e)
         {
@@ -147,13 +153,14 @@ public class MessageHandler
 
     internal async Task RedrawKeyboard(bool ifTypeWord)
     {
-        if (_article == null) return;
+        var article = _user.LastArticle;
+        if (article == null) return;
         
-        if (Validator.Normalize(_article.EngWord) != "error" && _user.UserSettings.IsPronunciationOn)
+        if (Validator.Normalize(article.EngWord) != "error" && _user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _extKbdPron);
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
@@ -164,7 +171,7 @@ public class MessageHandler
         {
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
                     ParseMode.Html, replyMarkup: _stdKbd);
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
