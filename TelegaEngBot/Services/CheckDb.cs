@@ -5,8 +5,6 @@ using NLog;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 
-#pragma warning disable CS8604
-
 namespace TelegaEngBot.Services;
 
 public class CheckDb
@@ -23,6 +21,7 @@ public class CheckDb
     {
         if (_dbContext.CommonVocabulary.Any()) return;
         Console.WriteLine("Database is empty.");
+        Logger.Fatal("Database is empty. Application was closed.");
         Environment.Exit(0);
         // Seeder.Seed(_dbContext);
         // Console.WriteLine("Database was seeded with test values.");
@@ -70,7 +69,7 @@ public class CheckDb
 
     private void SyncVocabularies(AppUser appUser)
     {
-        // Add item from CommonVocabulary to UserVocabulary
+        // Add new item from CommonVocabulary to UserVocabulary
         foreach (var article in _dbContext.CommonVocabulary)
         {
             if (appUser.UserVocabulary.Any(x => x.Article == article))
@@ -87,6 +86,7 @@ public class CheckDb
             appUser.UserVocabulary.Remove(item);
             _dbContext.SaveChanges();
         }
+        
         Logger.Info("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
                     appUser.TelegramUserId);
         Console.WriteLine("Common vocabulary and user vocabulary was synchronised for Telegram User Id: " +
