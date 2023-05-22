@@ -106,7 +106,7 @@ public class CheckDb
         _dbContext.SaveChanges();
     }
 
-    private static byte[] GetHash(Guid[] guids)
+    private byte[] GetHash(Guid[] guids)
     {
         Array.Sort(guids);
 
@@ -117,7 +117,7 @@ public class CheckDb
         return hash;
     }
 
-    private static ISerializable PrintHash(byte[] hash)
+    private ISerializable PrintHash(byte[] hash)
     {
         var sb = new StringBuilder();
         foreach (var t in hash)
