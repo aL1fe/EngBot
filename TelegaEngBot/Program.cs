@@ -107,17 +107,19 @@ class Program
             case "Don't know":
                 await messageHandler.NotKnow();
                 break;
-            case "Pronunciation":
+            case "/camb":
                 await messageHandler.Pron();
                 break;
-            case "tts":
+            case "Pronunciation":
                 await messageHandler.TextToSpeech();
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                 await _dbContext.SaveChangesAsync();
+                await botClient.SendTextMessageAsync(message.Chat.Id,
+                    "Smiles is " + (user.UserSettings.IsSmileOn ? "On" : "Off"));
                 break;
-            case "/sound":// "/pronunciation":
+            case "/pronunciation":
                 user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
                 await _dbContext.SaveChangesAsync();
                 await messageHandler.RedrawKeyboard(false);
