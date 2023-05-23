@@ -110,6 +110,9 @@ class Program
             case "Pronunciation":
                 await messageHandler.Pron();
                 break;
+            case "tts":
+                await messageHandler.TextToSpeech();
+                break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                 await _dbContext.SaveChangesAsync();

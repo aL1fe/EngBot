@@ -5,6 +5,7 @@ using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaEngBot.Handlers;
@@ -123,6 +124,44 @@ public class MessageHandler
         await Pronunciation.PronUs(_botClient, _message, article);
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "Click play to listen.", ParseMode.Html,
             replyMarkup: _stdKbd);
+    }
+
+    internal async Task TextToSpeech()
+    {
+        var article = _user.LastArticle;
+        
+        try
+        {
+            var client = new HttpClient();
+            var query = article.EngWord;
+            var fileName = Guid.NewGuid().ToString();
+
+            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
+            client.DefaultRequestHeaders.Add("accept", "application/json");
+
+            var response = await client.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseBody);
+                var filePath = @"C:\TTSAI\hack_deploy\Words\" + fileName + ".wav";
+                await using var fileStream = System.IO.File.OpenRead(filePath);
+                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
+                fileStream.Close();
+                // await Task.Delay(1000);
+                System.IO.File.Delete(filePath);
+            }
+            else
+            {
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        
     }
 
     private async Task GetNewWord()
