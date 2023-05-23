@@ -33,10 +33,7 @@ public class MessageHandler
         _message = message;
         _dbContext = dbContext;
         _user = user;
-    }
-    
-    private void InitiateKeyboard()
-    {
+        
         _btnKnow = new KeyboardButton("Know");
         _btnNotKnow = new KeyboardButton("Don't know");
         _btnPron = new KeyboardButton("Pronunciation");
@@ -49,10 +46,25 @@ public class MessageHandler
         _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
         _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
     }
+    
+    // private void InitiateKeyboard()
+    // {
+    //     _btnKnow = new KeyboardButton("Know");
+    //     _btnNotKnow = new KeyboardButton("Don't know");
+    //     _btnPron = new KeyboardButton("Pronunciation");
+    //
+    //     // Create rows
+    //     var row1 = new[] {_btnKnow, _btnNotKnow};
+    //     var row2 = new[] {_btnPron};
+    //
+    //     // Keyboards
+    //     _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
+    //     _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
+    // }
 
     internal async Task Start()
     {
-        InitiateKeyboard();
+        // InitiateKeyboard();
         await GetNewWord();
     }
 
@@ -122,8 +134,8 @@ public class MessageHandler
         var article = _user.LastArticle;
         if (article == null) return;
         await Pronunciation.PronUs(_botClient, _message, article);
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "Click play to listen.", ParseMode.Html,
-            replyMarkup: _stdKbd);
+        // await _botClient.SendTextMessageAsync(_message.Chat.Id, "Click play to listen.", ParseMode.Html,
+        //     replyMarkup: _stdKbd);
     }
 
     internal async Task TextToSpeech()
@@ -149,7 +161,6 @@ public class MessageHandler
                 await using var fileStream = System.IO.File.OpenRead(filePath);
                 await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
                 fileStream.Close();
-                // await Task.Delay(1000);
                 System.IO.File.Delete(filePath);
             }
             else
@@ -181,7 +192,7 @@ public class MessageHandler
         }
 
         // Checking if the keyboard is initialized
-        if (_stdKbd == null || _extKbdPron == null) InitiateKeyboard();
+        // if (_stdKbd == null || _extKbdPron == null) InitiateKeyboard();
 
         await RedrawKeyboard(true);
     }
@@ -191,7 +202,7 @@ public class MessageHandler
         var article = _user.LastArticle;
         if (article == null) return;
         
-        if (Validator.Normalize(article.EngWord) != "error" && _user.UserSettings.IsPronunciationOn)
+        if (_user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
@@ -199,7 +210,7 @@ public class MessageHandler
                     ParseMode.Html, replyMarkup: _extKbdPron);
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "Click \"Pronunciation\" to listen word.",
+                    "Click \"Pronunciation\" to listen word/phrase.",
                     ParseMode.Html, replyMarkup: _extKbdPron);
         }
         else
