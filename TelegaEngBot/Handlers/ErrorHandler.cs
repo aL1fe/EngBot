@@ -6,7 +6,7 @@ namespace TelegaEngBot.Handlers;
 
 internal static class ErrorHandler
 {
-    private static Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static string _lastErrorMessage = string.Empty;
     private static DateTime _lastErrorTimestamp = DateTime.MinValue;
 
@@ -24,6 +24,8 @@ internal static class ErrorHandler
                 $"HTTP request error: {httpException.Message}",
             System.Threading.Tasks.TaskCanceledException taskCanceledException =>
                 $"The request was canceled: {taskCanceledException.Message}",
+            System.Net.WebException webException =>
+                $"Web error: {webException.Message}",
             _ => exception.ToString()
         };
 
@@ -32,7 +34,7 @@ internal static class ErrorHandler
             _lastErrorMessage = errorMessage;
             _lastErrorTimestamp = DateTime.Now;
 
-            _logger.Warn(errorMessage);
+            Logger.Warn(errorMessage);
             Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ms") + " " + errorMessage);
         }
         
