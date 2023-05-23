@@ -182,6 +182,7 @@ public class MessageHandler
             //if SynchroniseVocabularies todo
             var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
             _user.LastArticle = article;
+            _user.LastActivity = DateTime.Now;
             await _dbContext.SaveChangesAsync();
             await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
         }
