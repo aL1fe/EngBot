@@ -24,6 +24,8 @@ internal static class ErrorHandler
                 $"HTTP request error: {httpException.Message}",
             System.Threading.Tasks.TaskCanceledException taskCanceledException =>
                 $"The request was canceled: {taskCanceledException.Message}",
+            System.Net.WebException webException =>
+                $"Web error: {webException.Message}",
             _ => exception.ToString()
         };
 
