@@ -1,4 +1,6 @@
 ﻿using NLog;
+using OpenAI_API;
+using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 using TelegaEngBot.Services;
@@ -22,6 +24,8 @@ public class MessageHandler
     private KeyboardButton _btnPron;
     private ReplyKeyboardMarkup _stdKbd;
     private ReplyKeyboardMarkup _extKbdPron;
+    private Article _lastArticle;
+    
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public MessageHandler(ITelegramBotClient botClient,
@@ -45,26 +49,12 @@ public class MessageHandler
         // Keyboards
         _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
         _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
+        
+        _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
     }
-    
-    // private void InitiateKeyboard()
-    // {
-    //     _btnKnow = new KeyboardButton("Know");
-    //     _btnNotKnow = new KeyboardButton("Don't know");
-    //     _btnPron = new KeyboardButton("Pronunciation");
-    //
-    //     // Create rows
-    //     var row1 = new[] {_btnKnow, _btnNotKnow};
-    //     var row2 = new[] {_btnPron};
-    //
-    //     // Keyboards
-    //     _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
-    //     _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
-    // }
 
     internal async Task Start()
     {
-        // InitiateKeyboard();
         await GetNewWord();
     }
 
@@ -80,7 +70,6 @@ public class MessageHandler
                 if (userArticle.Weight > 1)
                 {
                     userArticle.Weight--;
-                    // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                     await _dbContext.SaveChangesAsync();
                 }
 
@@ -110,7 +99,6 @@ public class MessageHandler
                 var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
                 userArticle.Weight++;
-                // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
                 await _dbContext.SaveChangesAsync();
 
                 if (_user.UserSettings.IsSmileOn) //Sad smile
@@ -134,47 +122,8 @@ public class MessageHandler
         var article = _user.LastArticle;
         if (article == null) return;
         await Pronunciation.PronUs(_botClient, _message, article);
-        // await _botClient.SendTextMessageAsync(_message.Chat.Id, "Click play to listen.", ParseMode.Html,
-        //     replyMarkup: _stdKbd);
     }
-
-    internal async Task TextToSpeech()
-    {
-        var article = _user.LastArticle;
-        
-        try
-        {
-            var client = new HttpClient();
-            var query = article.EngWord;
-            var fileName = Guid.NewGuid().ToString();
-
-            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
-            client.DefaultRequestHeaders.Add("accept", "application/json");
-
-            var response = await client.GetAsync(url);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
-                var filePath = @"C:\TTSAI\hack_deploy\Words\" + fileName + ".wav";
-                await using var fileStream = System.IO.File.OpenRead(filePath);
-                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
-                fileStream.Close();
-                System.IO.File.Delete(filePath);
-            }
-            else
-            {
-                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-        
-    }
-
+    
     private async Task GetNewWord()
     {
         try
@@ -191,10 +140,6 @@ public class MessageHandler
             Console.WriteLine(e);
             // add log todo
         }
-
-        // Checking if the keyboard is initialized
-        // if (_stdKbd == null || _extKbdPron == null) InitiateKeyboard();
-
         await RedrawKeyboard(true);
     }
 
@@ -239,5 +184,58 @@ public class MessageHandler
             await _botClient.SendTextMessageAsync(_message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
         }
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+    }
+
+    internal async Task TextToSpeech()
+    {
+        var article = _user.LastArticle;
+        
+        try
+        {
+            var client = new HttpClient();
+            var query = article.EngWord;
+            var fileName = Guid.NewGuid().ToString();
+
+            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
+            client.DefaultRequestHeaders.Add("accept", "application/json");
+
+            var response = await client.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
+                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".wav";
+                await using var fileStream = System.IO.File.OpenRead(filePath);
+                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
+                fileStream.Close();
+                System.IO.File.Delete(filePath);
+            }
+            else
+            {
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    
+    internal async Task Example()
+    {
+        var article = _user.LastArticle;
+        var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
+        var conversation = openAi.Chat.CreateConversation();
+        conversation.AppendUserInput($"Give me 3 examples for {article.EngWord} for beginner level.");
+        try
+        {
+            var response = await conversation.GetResponseFromChatbotAsync();
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, response);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }
