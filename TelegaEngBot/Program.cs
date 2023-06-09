@@ -127,6 +127,12 @@ class Program
             case "/hard":
                 await messageHandler.Hard();
                 break;
+            case "/ex":
+                if (message.Chat.Id != 450056320)
+                    break;
+                
+                await messageHandler.Example();
+                break;
         }
     }
 }
@@ -137,6 +143,6 @@ class Program
 /*
 start - Restart
 smile - Smile On/Off
-pronunciation - Pronunciation On/Of
+pronunciation - Pronunciation On/Off
 hard - Show 20 hard-to-remember words
 */
