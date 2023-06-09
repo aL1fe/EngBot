@@ -15,6 +15,10 @@ internal static class AppConfig
         _configuration = builder.Build();
     }
     
+    //From user secrets
     internal static string BotToken => _configuration.GetSection("BotToken")["TestBot"];
+    internal static string OpenAIToken => _configuration["OpenAIToken"];
+    
+    //From appsettings.json
     internal static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
 }
