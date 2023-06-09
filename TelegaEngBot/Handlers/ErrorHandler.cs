@@ -16,14 +16,16 @@ internal static class ErrorHandler
         {
             Telegram.Bot.Exceptions.RequestException {InnerException: System.Net.Http.HttpRequestException httpException} =>
                 $"Telegram HTTP request error: {httpException.Message}",
+            Telegram.Bot.Exceptions.RequestException {InnerException: System.Threading.Tasks.TaskCanceledException canceledException} =>
+                $"Telegram request canceled: {canceledException.Message}",
+            Telegram.Bot.Exceptions.RequestException {InnerException: System.IO.IOException ioException} =>
+                $"Telegram I/O error: {ioException.Message}",
             Telegram.Bot.Exceptions.ApiRequestException apiRequestException =>
                 $"Telegram API error: {apiRequestException.ErrorCode} - {apiRequestException.Message}",
             System.Net.Sockets.SocketException socketException =>
                 $"Network error: {socketException.Message}",
             System.Net.Http.HttpRequestException httpException =>
                 $"HTTP request error: {httpException.Message}",
-            System.Threading.Tasks.TaskCanceledException taskCanceledException =>
-                $"The request was canceled: {taskCanceledException.Message}",
             System.Net.WebException webException =>
                 $"Web error: {webException.Message}",
             _ => exception.ToString()
