@@ -11,7 +11,9 @@ public class AppDbContext: DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(AppConfig.ConnectionString);
+        optionsBuilder
+            .UseLazyLoadingProxies()
+            .UseSqlServer(AppConfig.ConnectionString);
     }
 }
 

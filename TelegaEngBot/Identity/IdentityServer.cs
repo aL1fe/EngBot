@@ -1,18 +1,25 @@
 ﻿namespace TelegaEngBot.Identity;
 
-internal static class IdentityServer
+public class IdentityServer
 {
-    internal static bool CheckAuth(long id)
+    private long _id;
+    public IdentityServer(long id)
     {
-        if (id == 450056320 
-            || id == 906180277 //Alenchik
-            || id == 438560103 //Chilikin
-            || id == 1947844639 //Natalia Eng
-            || id == 97497993 //Dima Barabash
-            || id == 301751068 //Alla
-            || id == 743455767 //Andrey Epicflow
-            || id == 614751690 //Alexandra GlassBox
-            ) //558784871 Prygun
+        _id = id;
+    }
+    public bool CheckAuth()
+    {
+        return true; // identity off
+        
+        if (_id == 450056320 
+            || _id == 906180277 //Alenchik
+            || _id == 438560103 //Chilikin
+            || _id == 1947844639 //Natalia Eng
+            || _id == 97497993 //Dima Barabash
+            || _id == 301751068 //Alla
+            || _id == 743455767 //Andrey Epicflow
+            || _id == 614751690 //Alexandra GlassBox
+            || _id == 558784871) // Prygun
         {
             return true;
         }

@@ -1,190 +1,241 @@
 ﻿using NLog;
+using OpenAI_API;
+using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Models;
 using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
-#pragma warning disable CS8604
-#pragma warning disable CS8602
 
 namespace TelegaEngBot.Handlers;
 
-internal static class MessageHandler
+public class MessageHandler
 {
-    private static Article? _article;
-    private static KeyboardButton? _btnKnow;
-    private static KeyboardButton? _btnNotKnow;
-    private static KeyboardButton? _btnUsPron;
-    private static ReplyKeyboardMarkup? _keyboard2Btn;
-    private static ReplyKeyboardMarkup? _keyboard3Btn;
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private ITelegramBotClient _botClient;
+    private Message _message;
+    private AppDbContext _dbContext;
+    private AppUser _user;
 
-    private static void InitiateKeyboard()
-    {
-        _btnKnow = new KeyboardButton("Know");
-        _btnNotKnow = new KeyboardButton("Don't know");
-        _btnUsPron = new KeyboardButton("Pronunciation");
+    private KeyboardButton _btnKnow;
+    private KeyboardButton _btnNotKnow;
+    private KeyboardButton _btnPron;
+    private ReplyKeyboardMarkup _stdKbd;
+    private ReplyKeyboardMarkup _extKbdPron;
+    private Article _lastArticle;
+    
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        // Create rows
-        var row1 = new[] {_btnKnow, _btnNotKnow};
-        var row2 = new[] {_btnUsPron};
-
-        // Keyboards
-        _keyboard2Btn = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true};
-        _keyboard3Btn = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true};
-    }
-
-    internal static async Task Start(ITelegramBotClient botClient, 
-        Message message, 
-        AppDbContext dbContext, 
-        AppUser user)
-    {
-        InitiateKeyboard();
-        await GetNewWord(botClient, message, dbContext, user);
-    }
-
-    internal static async Task Know(ITelegramBotClient botClient,
+    public MessageHandler(ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
         AppUser user)
     {
-        if (_article != null)
+        _botClient = botClient;
+        _message = message;
+        _dbContext = dbContext;
+        _user = user;
+        
+        _btnKnow = new KeyboardButton("Know");
+        _btnNotKnow = new KeyboardButton("Don't know");
+        _btnPron = new KeyboardButton("Pronunciation");
+
+        // Create rows
+        var row1 = new[] {_btnKnow, _btnNotKnow};
+        var row2 = new[] {_btnPron};
+
+        // Keyboards
+        _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
+        _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
+        
+        _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
+    }
+
+    internal async Task Start()
+    {
+        await GetNewWord();
+    }
+
+    internal async Task Know()
+    {
+        var article = _user.LastArticle;
+        if (article != null)
         {
             try
             {
-                var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
                 if (userArticle.Weight > 1)
                 {
                     userArticle.Weight--;
-                    // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
-                    await dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync();
                 }
 
-                if (user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
-                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F642));
+                if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+                    await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
-                              _article.RusWord);
+                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                              article.RusWord);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log todo
+                _logger.Error(e);
             }
         }
 
-        await GetNewWord(botClient, message, dbContext, user);
+        await GetNewWord();
     }
 
-    internal static async Task NotKnow(ITelegramBotClient botClient,
-        Message message,
-        AppDbContext dbContext,
-        AppUser user)
+    internal async Task NotKnow()
     {
-        if (_article != null)
+        var article = _user.LastArticle;
+        if (article != null)
         {
             try
             {
-                var userArticle = user.UserVocabulary.FirstOrDefault(x => x.Article == _article);
+                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
                 userArticle.Weight++;
-                // user.TotalArticlesWeight = user.UserVocabulary.Sum(x => x.Weight);
-                await dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
-                if (user.UserSettings.IsSmileOn) //Sad smile
-                    await botClient.SendTextMessageAsync(message.Chat.Id, char.ConvertFromUtf32(0x1F622));
+                if (_user.UserSettings.IsSmileOn) //Sad smile
+                    await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                Logger.Trace("UserId: " + message.Chat.Id + ", EngWord: " + _article.EngWord + ", RusWord: " +
-                                  _article.RusWord);
+                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
+                                  article.RusWord);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                // add log todo
+                _logger.Error(e);
             }
         }
 
-        await GetNewWord(botClient, message, dbContext, user);
+        await GetNewWord();
     }
 
-    internal static async Task Pron(ITelegramBotClient botClient, Message message)
+    internal async Task Pron()
     {
-        if (_article == null) return;
-        await Pronunciation.PronUs(botClient, message, _article);
-        await botClient.SendTextMessageAsync(message.Chat.Id, "Click play to listen.", ParseMode.Html,
-            replyMarkup: _keyboard2Btn);
+        var article = _user.LastArticle;
+        if (article == null) return;
+        await Pronunciation.PronUs(_botClient, _message, article);
     }
-
-    private static async Task GetNewWord(ITelegramBotClient botClient, 
-        Message message, 
-        AppDbContext dbContext,
-        AppUser user)
+    
+    private async Task GetNewWord()
     {
         try
         {
             //if SynchroniseVocabularies todo
-            _article = WeightedRandomSelector.SelectArticle(user.UserVocabulary).Article;
-            await botClient.SendTextMessageAsync(message.Chat.Id, _article.RusWord);
+            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
+            _user.LastArticle = article;
+            _user.LastActivity = DateTime.Now;
+            await _dbContext.SaveChangesAsync();
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             // add log todo
         }
-
-        // Checking if the keyboard is initialized
-        if (_keyboard2Btn == null || _keyboard3Btn == null) InitiateKeyboard();
-
-        await RedrawKeyboard(botClient, message, true, user);
+        await RedrawKeyboard(true);
     }
 
-    internal static async Task RedrawKeyboard(ITelegramBotClient botClient, 
-        Message message, 
-        bool ifTypeWord,
-        AppUser user)
+    internal async Task RedrawKeyboard(bool ifTypeWord)
     {
-        if (_article == null) return;
+        var article = _user.LastArticle;
+        if (article == null) return;
         
-        if (Validator.ValidateAndTransform(_article.EngWord) != "error" && user.UserSettings.IsPronunciationOn)
+        if (_user.UserSettings.IsPronunciationOn)
         {
             if (ifTypeWord)
-                await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _keyboard3Btn);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id,
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
+                    ParseMode.Html, replyMarkup: _extKbdPron);
             else
-                await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "Click \"Pronunciation\" to listen word.",
-                    ParseMode.Html, replyMarkup: _keyboard3Btn);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id,
+                    "Click \"Pronunciation\" to listen word/phrase.",
+                    ParseMode.Html, replyMarkup: _extKbdPron);
         }
         else
         {
             if (ifTypeWord)
-                await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "<tg-spoiler>" + _article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _keyboard2Btn);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id,
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
+                    ParseMode.Html, replyMarkup: _stdKbd);
             else
-                await botClient.SendTextMessageAsync(message.Chat.Id,
-                    "Button \"Pronunciation\" is " + (user.UserSettings.IsPronunciationOn ? "On" : "Off"),
-                    ParseMode.Html, replyMarkup: _keyboard2Btn);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id,
+                    "Button \"Pronunciation\" is " + (_user.UserSettings.IsPronunciationOn ? "On" : "Off"),
+                    ParseMode.Html, replyMarkup: _stdKbd);
         }
     }
 
-    internal static async Task Hard(ITelegramBotClient botClient,
-        Message message,
-        AppUser user)
+    internal async Task Hard()
     {
-        var hardWordList = user.UserVocabulary
+        var hardWordList = _user.UserVocabulary
             .OrderByDescending(x => x.Weight)
             .Take(20)
             .Select(x => new { Article = x.Article, Weight = x.Weight })
             .ToList();
         foreach (var hardWord in hardWordList)
         {
-            await botClient.SendTextMessageAsync(message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
         }
-        await botClient.SendTextMessageAsync(message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+    }
+
+    internal async Task TextToSpeech()
+    {
+        var article = _user.LastArticle;
+        
+        try
+        {
+            var client = new HttpClient();
+            var query = article.EngWord;
+            var fileName = Guid.NewGuid().ToString();
+
+            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
+            client.DefaultRequestHeaders.Add("accept", "application/json");
+
+            var response = await client.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
+                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".wav";
+                await using var fileStream = System.IO.File.OpenRead(filePath);
+                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
+                fileStream.Close();
+                System.IO.File.Delete(filePath);
+            }
+            else
+            {
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    
+    internal async Task Example()
+    {
+        var article = _user.LastArticle;
+        var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
+        var conversation = openAi.Chat.CreateConversation();
+        conversation.AppendUserInput($"Give me 3 examples for {article.EngWord} for beginner level.");
+        try
+        {
+            var response = await conversation.GetResponseFromChatbotAsync();
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, response);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 }
