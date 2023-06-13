@@ -28,7 +28,8 @@ public class MessageHandler
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public MessageHandler(ITelegramBotClient botClient,
+    public MessageHandler(
+        ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
         AppUser user)
@@ -186,41 +187,11 @@ public class MessageHandler
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
-    internal async Task TextToSpeech()
+    internal void TextToSpeech()
     {
         var article = _user.LastArticle;
-        
-        try
-        {
-            var client = new HttpClient();
-            var query = article.EngWord;
-            var fileName = Guid.NewGuid().ToString();
-
-            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
-            client.DefaultRequestHeaders.Add("accept", "application/json");
-
-            var response = await client.GetAsync(url);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
-                _logger.Trace(responseBody);
-                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".mp3";
-                await using var fileStream = System.IO.File.OpenRead(filePath);
-                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.mp3"));
-                fileStream.Close();
-                System.IO.File.Delete(filePath);
-            }
-            else
-            {
-                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        var tts = new Pronunciation(_botClient, _message);
+        tts?.TextToSpeech(article);
     }
     
     internal async Task Example()

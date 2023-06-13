@@ -105,7 +105,7 @@ class Program
                 await messageHandler.NotKnow();
                 break;
             case "Pronunciation":
-                await messageHandler.TextToSpeech();
+                messageHandler.TextToSpeech();
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
