@@ -228,7 +228,8 @@ public class MessageHandler
         var article = _user.LastArticle;
         var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
         var conversation = openAi.Chat.CreateConversation();
-        conversation.AppendUserInput($"Give me 3 examples for {article.EngWord} for beginner level.");
+        conversation.AppendUserInput(
+            $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words.");
         try
         {
             var response = await conversation.GetResponseFromChatbotAsync();
