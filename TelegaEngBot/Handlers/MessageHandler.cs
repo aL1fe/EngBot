@@ -205,9 +205,10 @@ public class MessageHandler
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
                 Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
-                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".wav";
+                _logger.Trace(responseBody);
+                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".mp3";
                 await using var fileStream = System.IO.File.OpenRead(filePath);
-                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
+                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.mp3"));
                 fileStream.Close();
                 System.IO.File.Delete(filePath);
             }
