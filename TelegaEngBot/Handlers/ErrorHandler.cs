@@ -4,13 +4,13 @@ using Telegram.Bot.Exceptions;
 
 namespace TelegaEngBot.Handlers;
 
-internal static class ErrorHandler
+public static class ErrorHandler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static string _lastErrorMessage = string.Empty;
     private static DateTime _lastErrorTimestamp = DateTime.MinValue;
 
-    internal static Task HandleError(ITelegramBotClient client, Exception exception, CancellationToken ct)
+    public static Task HandleError(ITelegramBotClient client, Exception exception, CancellationToken ct)
     {
         var errorMessage = exception switch
         {

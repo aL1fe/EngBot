@@ -54,12 +54,12 @@ public class MessageHandler
         _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
     }
 
-    internal async Task Start()
+    public async Task Start()
     {
         await GetNewWord();
     }
 
-    internal async Task Know()
+    public async Task Know()
     {
         var article = _user.LastArticle;
         if (article != null)
@@ -90,7 +90,7 @@ public class MessageHandler
         await GetNewWord();
     }
 
-    internal async Task NotKnow()
+    public async Task NotKnow()
     {
         var article = _user.LastArticle;
         if (article != null)
@@ -118,7 +118,7 @@ public class MessageHandler
         await GetNewWord();
     }
 
-    internal async Task Pron()
+    public async Task CambridgePron()
     {
         var article = _user.LastArticle;
         if (article == null) return;
@@ -144,7 +144,7 @@ public class MessageHandler
         await RedrawKeyboard(true);
     }
 
-    internal async Task RedrawKeyboard(bool ifTypeWord)
+    public async Task RedrawKeyboard(bool ifTypeWord) //todo
     {
         var article = _user.LastArticle;
         if (article == null) return;
@@ -173,11 +173,11 @@ public class MessageHandler
         }
     }
 
-    internal async Task Hard()//
+    public async Task Hard()
     {
         var hardWordList = _user.UserVocabulary
             .OrderByDescending(x => x.Weight)
-            .Take(20)
+            .Take(10)
             .Select(x => new { Article = x.Article, Weight = x.Weight })
             .ToList();
         var tts = new Pronunciation(_botClient, _message);
@@ -190,24 +190,24 @@ public class MessageHandler
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
-    internal async Task TextToSpeech()
+    public async Task TextToSpeech()
     {
         var article = _user.LastArticle;
         var tts = new Pronunciation(_botClient, _message);
         await tts.TextToSpeech(article);
     }
     
-    internal async Task Example()
+    public async Task Example()
     {
         var article = _user.LastArticle;
         var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
         var conversation = openAi.Chat.CreateConversation();
         conversation.AppendUserInput(
-            $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words.");
+            $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words. Mark {article.EngWord} like <b><i>{article.EngWord}</i></b>.");
         try
         {
             var response = await conversation.GetResponseFromChatbotAsync();
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, response);
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, response, ParseMode.Html);
         }
         catch (Exception e)
         {
