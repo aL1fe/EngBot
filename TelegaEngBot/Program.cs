@@ -32,8 +32,7 @@ class Program
         if (botToken != null)
         {
             var botClient = new TelegramBotClient(botToken);
-            //var botClient = new TelegramBotClient("6051962495:AAGqNcy-Li67m4IE6E1XpU8MGlS6e8Q6f0s"); // testBot
-
+            
             using var cts = new CancellationTokenSource();
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(
@@ -43,8 +42,6 @@ class Program
                 cancellationToken: cts.Token
             );
             
-            //await botClient.SendTextMessageAsync(450056320, "Press /start to begin.", cancellationToken: cts.Token);
-
             var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
             Logger.Info("Start listening for @" + me.Username + ".");
             Console.WriteLine("Start listening for @" + me.Username);
@@ -107,11 +104,8 @@ class Program
             case "Don't know":
                 await messageHandler.NotKnow();
                 break;
-            case "/camb":
-                await messageHandler.Pron();
-                break;
             case "Pronunciation":
-                await messageHandler.TextToSpeech();
+                messageHandler.TextToSpeech();
                 break;
             case "/smile":
                 user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
@@ -127,10 +121,12 @@ class Program
             case "/hard":
                 await messageHandler.Hard();
                 break;
+            case "/camb":
+                await messageHandler.Pron();
+                break;
             case "/ex":
                 if (message.Chat.Id != 450056320)
                     break;
-                
                 await messageHandler.Example();
                 break;
         }
