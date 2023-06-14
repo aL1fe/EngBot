@@ -173,25 +173,28 @@ public class MessageHandler
         }
     }
 
-    internal async Task Hard()
+    internal async Task Hard()//
     {
         var hardWordList = _user.UserVocabulary
             .OrderByDescending(x => x.Weight)
             .Take(20)
             .Select(x => new { Article = x.Article, Weight = x.Weight })
             .ToList();
+        var tts = new Pronunciation(_botClient, _message);
         foreach (var hardWord in hardWordList)
         {
             await _botClient.SendTextMessageAsync(_message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
+            if (_user.UserSettings.IsPronunciationOn)
+                await tts.TextToSpeech(hardWord.Article);
         }
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
-    internal void TextToSpeech()
+    internal async Task TextToSpeech()
     {
         var article = _user.LastArticle;
         var tts = new Pronunciation(_botClient, _message);
-        tts?.TextToSpeech(article);
+        await tts.TextToSpeech(article);
     }
     
     internal async Task Example()
