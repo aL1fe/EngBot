@@ -2,7 +2,7 @@
 
 namespace TelegaEngBot.AppConfigurations;
 
-internal static class AppConfig
+public static class AppConfig
 {
     private static IConfiguration _configuration;
 
@@ -16,9 +16,12 @@ internal static class AppConfig
     }
     
     //From user secrets
-    internal static string BotToken => _configuration.GetSection("BotToken")["TestBot"];
-    internal static string OpenAIToken => _configuration["OpenAIToken"];
+    public static string BotToken => _configuration.GetSection("BotToken")["TestBot"];
+    public static string OpenAIToken => _configuration.GetSection("OpenAI")["OpenAIToken"];
     
     //From appsettings.json
-    internal static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
+    public static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
+    public static string OpenAIPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
+    public static string PronunciationFolderPath => _configuration["PronunciationFolderPath"];
+    public static string NeuralModelHost => _configuration["NeuralModelHost"];
 }

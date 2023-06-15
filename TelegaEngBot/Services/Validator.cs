@@ -1,8 +1,8 @@
 ﻿namespace TelegaEngBot.Services;
 
-internal static class Validator
+public static class Validator
 {
-    internal static string Normalize(string engWord)
+    public static string Normalize(string engWord)
     {
         if (engWord.StartsWith(' ')) // delete space in the begin of the word
         {

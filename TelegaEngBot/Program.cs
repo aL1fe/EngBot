@@ -47,7 +47,10 @@ class Program
             Console.WriteLine("Start listening for @" + me.Username);
         }
         else
+        {
             Logger.Fatal("Bot token not found.");
+            Console.WriteLine("Bot token not found.");
+        }
 
         Console.WriteLine("Press \"Enter\" to exit...");
         Console.Read();
@@ -122,12 +125,11 @@ class Program
                 await messageHandler.Hard();
                 break;
             case "/camb":
-                await messageHandler.Pron();
+                await messageHandler.CambridgePron();
                 break;
             case "/ex":
-                if (message.Chat.Id != 450056320)
-                    break;
-                await messageHandler.Example();
+                if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103)
+                    await messageHandler.Example();
                 break;
         }
     }
@@ -140,5 +142,5 @@ class Program
 start - Restart
 smile - Smile On/Off
 pronunciation - Pronunciation On/Off
-hard - Show 20 hard-to-remember words
+hard - Show 10 hard-to-remember words
 */
