@@ -28,7 +28,8 @@ public class MessageHandler
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public MessageHandler(ITelegramBotClient botClient,
+    public MessageHandler(
+        ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
         AppUser user)
@@ -53,12 +54,12 @@ public class MessageHandler
         _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
     }
 
-    internal async Task Start()
+    public async Task Start()
     {
         await GetNewWord();
     }
 
-    internal async Task Know()
+    public async Task Know()
     {
         var article = _user.LastArticle;
         if (article != null)
@@ -89,7 +90,7 @@ public class MessageHandler
         await GetNewWord();
     }
 
-    internal async Task NotKnow()
+    public async Task NotKnow()
     {
         var article = _user.LastArticle;
         if (article != null)
@@ -117,7 +118,7 @@ public class MessageHandler
         await GetNewWord();
     }
 
-    internal async Task Pron()
+    public async Task CambridgePron()
     {
         var article = _user.LastArticle;
         if (article == null) return;
@@ -143,7 +144,7 @@ public class MessageHandler
         await RedrawKeyboard(true);
     }
 
-    internal async Task RedrawKeyboard(bool ifTypeWord)
+    public async Task RedrawKeyboard(bool ifTypeWord) //todo
     {
         var article = _user.LastArticle;
         if (article == null) return;
@@ -172,66 +173,41 @@ public class MessageHandler
         }
     }
 
-    internal async Task Hard()
+    public async Task Hard()
     {
         var hardWordList = _user.UserVocabulary
             .OrderByDescending(x => x.Weight)
-            .Take(20)
+            .Take(10)
             .Select(x => new { Article = x.Article, Weight = x.Weight })
             .ToList();
+        var tts = new Pronunciation(_botClient, _message);
         foreach (var hardWord in hardWordList)
         {
             await _botClient.SendTextMessageAsync(_message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
+            if (_user.UserSettings.IsPronunciationOn)
+                await tts.TextToSpeech(hardWord.Article);
         }
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
-    internal async Task TextToSpeech()
+    public async Task TextToSpeech()
     {
         var article = _user.LastArticle;
-        
-        try
-        {
-            var client = new HttpClient();
-            var query = article.EngWord;
-            var fileName = Guid.NewGuid().ToString();
-
-            var url = $"http://127.0.0.1:8000/?query={query}&file_name={fileName}";
-            client.DefaultRequestHeaders.Add("accept", "application/json");
-
-            var response = await client.GetAsync(url);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
-                var filePath = @"C:\TTSAI\Tacotron2\Words\" + fileName + ".wav";
-                await using var fileStream = System.IO.File.OpenRead(filePath);
-                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Sound.wav"));
-                fileStream.Close();
-                System.IO.File.Delete(filePath);
-            }
-            else
-            {
-                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        var tts = new Pronunciation(_botClient, _message);
+        await tts.TextToSpeech(article);
     }
     
-    internal async Task Example()
+    public async Task Example()
     {
         var article = _user.LastArticle;
         var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
         var conversation = openAi.Chat.CreateConversation();
-        conversation.AppendUserInput($"Give me 3 examples for {article.EngWord} for beginner level.");
+        conversation.AppendUserInput(
+            $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words. Mark {article.EngWord} like <b><i>{article.EngWord}</i></b>.");
         try
         {
             var response = await conversation.GetResponseFromChatbotAsync();
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, response);
+            await _botClient.SendTextMessageAsync(_message.Chat.Id, response, ParseMode.Html);
         }
         catch (Exception e)
         {

@@ -2,9 +2,9 @@
 
 namespace TelegaEngBot.Services;
 
-internal class Parser
+public class Parser
 {
-    internal string ParsHtml(string engWord)
+    public string ParsHtml(string engWord)
     {
         var listUris = new List<string>(10);
 
