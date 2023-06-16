@@ -28,6 +28,8 @@ public static class ErrorHandler
                 $"HTTP request error: {httpException.Message}",
             System.Net.WebException webException =>
                 $"Web error: {webException.Message}",
+            System.Security.Authentication.AuthenticationException authException =>
+                $"OpenAI authentication error: {authException.Message}",
             _ => exception.ToString()
         };
 
