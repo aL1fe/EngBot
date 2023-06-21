@@ -75,6 +75,8 @@ public class Pronunciation
             {
                 if (uri != null) 
                     await botClient.SendAudioAsync(message.Chat.Id, audio: uri);
+                else
+                    await botClient.SendTextMessageAsync(message.Chat.Id, "*Sorry, cannot play this word.*", ParseMode.Markdown);
             }
             catch (Exception e)
             {
