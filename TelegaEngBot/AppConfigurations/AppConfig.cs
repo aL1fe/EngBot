@@ -20,7 +20,8 @@ public static class AppConfig
     public static string OpenAIToken => _configuration.GetSection("OpenAI")["OpenAIToken"];
     
     //From appsettings.json
-    public static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
+    // public static string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
+    public static string ConnectionString => _configuration.GetConnectionString("DockerConnection");
     public static string OpenAIPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
     public static string PronunciationFolderPath => _configuration["PronunciationFolderPath"];
     public static string NeuralModelHost => _configuration["NeuralModelHost"];
