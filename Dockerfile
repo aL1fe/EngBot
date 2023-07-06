@@ -11,6 +11,7 @@ RUN dotnet publish -c Release -o out
 
 # Определение базового образа для запуска
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
 
 # Копирование собранного приложения
 COPY --from=build-env /app/out .
