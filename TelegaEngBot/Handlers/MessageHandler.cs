@@ -200,7 +200,7 @@ public class MessageHandler
     public async Task Example()
     {
         var article = _user.LastArticle;
-        var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAIToken));
+        var openAi = new OpenAIAPI(new APIAuthentication(AppConfig.OpenAiToken));
         var conversation = openAi.Chat.CreateConversation();
         conversation.AppendUserInput(
             $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words. Mark {article.EngWord} like <b><i>{article.EngWord}</i></b>.");

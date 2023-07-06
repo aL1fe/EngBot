@@ -1,4 +1,4 @@
-$serverName = "127.0.0.1,1444"
+$serverName = "127.0.0.1,1455"
 $databaseName = "Mnemonics"
 $userName = "sa"
 $password = "DZVW2cBqzfYAaHwAPhEg"

@@ -28,23 +28,20 @@ public class Pronunciation
         {
             var client = new HttpClient();
             var query = article.EngWord;
-            var fileName = Guid.NewGuid().ToString();
 
-            var url = AppConfig.NeuralModelHost + $"/?query={query}&file_name={fileName}";
+            var url = $"{AppConfig.NeuralModelHost}/?query={query}";
+
+            Console.WriteLine(url);
             client.DefaultRequestHeaders.Add("accept", "application/json");
 
             var response = await client.GetAsync(url);
-            
             if (response.IsSuccessStatusCode)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + " " + responseBody);
-                Logger.Trace(responseBody);
-                var filePath = AppConfig.PronunciationFolderPath + fileName + ".mp3";
-                await using var fileStream = System.IO.File.OpenRead(filePath);
-                await _botClient.SendDocumentAsync(_message.Chat.Id, new InputOnlineFile(fileStream, @"Pronunciation.mp3"));
-                fileStream.Close();
-                System.IO.File.Delete(filePath);
+                await using var audioStream = await response.Content.ReadAsStreamAsync();
+                using var memoryStream = new MemoryStream();
+                await audioStream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                await _botClient.SendAudioAsync(_message.Chat.Id, new InputOnlineFile(memoryStream, "Pronunciation.mp3"));
             }
             else
             {

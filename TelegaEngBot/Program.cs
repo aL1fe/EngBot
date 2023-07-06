@@ -52,6 +52,8 @@ class Program
             Console.WriteLine("Bot token not found.");
         }
 
+        if (AppConfig.Env == "Production") while (true) {}
+
         Console.WriteLine("Press \"Enter\" to exit...");
         Console.Read();
         Logger.Info("Stop listening bot.");
