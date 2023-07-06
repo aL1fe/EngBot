@@ -28,7 +28,7 @@ public static class AppConfig
     public static string ConnectionString =>
         Env == "Production"
             ? _configuration["CONNECTION_STRING"]
-            : _configuration.GetConnectionString("DockerConnection");
+            : _configuration.GetConnectionString("TestDbDocker");
 
     public static string NeuralModelHost =>
         Env == "Production"
