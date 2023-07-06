@@ -452,3 +452,8 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+TelegramEngBot_DB/
+.vs/
+Tacotron2/ffmpeg.exe
+Tacotron2/ffprobe.exe
