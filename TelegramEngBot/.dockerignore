@@ -1,0 +1,6 @@
+.git
+.idea
+SQLQueries
+bin
+obj
+remakeImage.bat
