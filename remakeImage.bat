@@ -1,1 +1,1 @@
-docker build -t eng-bot-image .
+docker build -t eng-bot-bot .
