@@ -29,7 +29,9 @@ public class Pronunciation
             var client = new HttpClient();
             var query = article.EngWord;
 
-            var url = AppConfig.NeuralModelHost + $"/?query={query}";
+            var url = $"{AppConfig.NeuralModelHost}/?query={query}";
+
+            Console.WriteLine(url);
             client.DefaultRequestHeaders.Add("accept", "application/json");
 
             var response = await client.GetAsync(url);
