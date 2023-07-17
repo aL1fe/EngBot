@@ -19,7 +19,7 @@ services:
       BOT_TOKEN: 
       OPEN_AI_TOKEN: 
     volumes:
-      - /mnt/sdb/EngBot/UserSecrets:/root/.microsoft/usersecrets:ro
+      # - /mnt/sdb/EngBot/UserSecrets:/root/.microsoft/usersecrets:ro
       - /mnt/sdb/EngBot/logs:/app/logs
       
   tts-model:
