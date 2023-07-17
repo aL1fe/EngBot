@@ -20,10 +20,13 @@ public static class AppConfig
 
     public static string BotToken =>
         Env == "Production"
-            ? _configuration.GetSection("BotToken")["ProdBot"]
+            ? _configuration["BOT_TOKEN"]
             : _configuration.GetSection("BotToken")["TestBot"];
 
-    public static string OpenAiToken => _configuration.GetSection("OpenAI")["OpenAIToken"];
+    public static string OpenAiToken =>
+        Env == "Production"
+        ? _configuration["OPEN_AI_TOKEN"]
+        : _configuration.GetSection("OpenAI")["OpenAIToken"];
 
     public static string ConnectionString =>
         Env == "Production"
@@ -35,5 +38,5 @@ public static class AppConfig
             ? _configuration["NEURAL_MODEL_HOST"]
             : _configuration["NeuralModelHost"];
     
-    public static string OpenAiPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
+    public static string OpenAIPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
 }
