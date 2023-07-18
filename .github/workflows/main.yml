@@ -22,7 +22,7 @@ jobs:
         script: |
           cd ../../deploy
           docker-compose down
-          docker image rm al1fe/eng-bot-bot
+    # docker image rm al1fe/eng-bot-bot
 
     # - name: Build Docker images
       # run: |        
