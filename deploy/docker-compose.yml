@@ -3,10 +3,10 @@ name: eng-bot
 services:
   bot:
     container_name: Eng-Bot
-    # image: al1fe/eng-bot-bot  # image on docker hub
-    build:
-      context: ../TelegramEngBot
-      dockerfile: Dockerfile
+    image: al1fe/eng-bot-bot  # image on docker hub
+    # build:
+      # context: ../TelegramEngBot
+      # dockerfile: Dockerfile
     restart: always
     depends_on:
       - tts-model
