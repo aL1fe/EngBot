@@ -1,6 +1,30 @@
 version: '3'
 name: eng-bot
 services:
+  bot:
+    container_name: Eng-Bot
+    build:
+      context: ../../TelegramEngBot
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - tts-model
+      - azure-sql-server
+    environment:
+      ENVIRONMENT: Production
+      CONNECTION_STRING: Server=azure-sql-server;Database=Mnemonics;User ID=sa;Password=DZVW2cBqzfYAaHwAPhEg;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=true;      
+      NEURAL_MODEL_HOST: http://tts-tacotron2:8000
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ../../logs:/app/logs
+
+  tts-model:
+    container_name: tts-tacotron2
+    image: al1fe/eng-bot-tts-model
+    restart: always
+    ports:
+      - 8055:8000
+
   azure-sql-server:
     container_name: mnemonics-sql-db
     image: "mcr.microsoft.com/azure-sql-edge"
@@ -12,38 +36,8 @@ services:
       - ACCEPT_EULA=Y
     volumes:
       - type: bind
-        source: ..\TelegramEngBot_DB
+        source: ../../TelegramEngBot_DB
         target: /var/opt/mssql/data
-        
-  tts-model:
-    container_name: tts-tacotron2
-    # build: ../Tacotron2
-    build:
-      context: ../Tacotron2
-      dockerfile: Dockerfile
-      image: al1fe/eng-bot-tts-model
-    restart: always
-    ports:
-      - 8055:8000
-      
-  bot:
-    container_name: Eng-Bot
-    # build: ../TelegramEngBot
-    build:
-      context: ../TelegramEngBot
-      dockerfile: Dockerfile
-      image: al1fe/eng-bot-bot
-    restart: always
-    depends_on:
-      - tts-model
-      - azure-sql-server
-    environment:
-      ENVIRONMENT: Production
-      CONNECTION_STRING: Server=azure-sql-server;Database=Mnemonics;User ID=sa;Password=DZVW2cBqzfYAaHwAPhEg;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=true;      
-      NEURAL_MODEL_HOST: http://tts-tacotron2:8000
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ../logs:/app/logs
 
 volumes:
   eng_bot_db_data:
