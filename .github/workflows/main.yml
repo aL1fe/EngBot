@@ -22,7 +22,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
           cd /mnt/sdb/gitRepo/TelegramEngBot/deploy
-          docker-compose down
+          docker compose down
     # docker image rm al1fe/eng-bot-bot
 
     # - name: Build Docker images
