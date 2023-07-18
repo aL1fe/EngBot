@@ -7,7 +7,6 @@ services:
     build:
       context: ../TelegramEngBot
       dockerfile: Dockerfile
-      image: al1fe/eng-bot-bot    
     restart: always
     depends_on:
       - tts-model
@@ -19,7 +18,7 @@ services:
       BOT_TOKEN: 
       OPEN_AI_TOKEN: 
     volumes:
-      - /mnt/sdb/EngBot/UserSecrets:/root/.microsoft/usersecrets:ro
+      # - /mnt/sdb/EngBot/UserSecrets:/root/.microsoft/usersecrets:ro
       - /mnt/sdb/EngBot/logs:/app/logs
       
   tts-model:
