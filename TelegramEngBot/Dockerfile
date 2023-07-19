@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY . .
 RUN ls -la
-RUN cd TelegramEngBot/TelegramEngBot && ls -la
-RUN dotnet restore 
+RUN cd TelegramEngBot/TelegaEngBot && ls -la
+RUN dotnet restore TelegaEngBot.sln
 
 # Копирование файла Solution и восстановление зависимостей
 # COPY . .
