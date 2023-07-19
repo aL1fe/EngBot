@@ -19,7 +19,8 @@ services:
       
   tts-model:
     container_name: tts-tacotron2
-    image: al1fe/tacotron2-model
+    # image: al1fe/tacotron2-model
+    image: al1fe/eng-bot-tts-model
     restart: always
     ports:
       - 8055:8000
