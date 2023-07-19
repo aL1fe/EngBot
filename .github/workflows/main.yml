@@ -29,8 +29,9 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
-          cd /mnt/sdb/gitRepo/TelegramEngBot/deploy
-          docker compose down
-    # docker image rm al1fe/eng-bot
-    # docker compose up
+        # cd /mnt/sdb/gitRepo/TelegramEngBot/deploy # удалить за ненадобностью
+        # docker compose down
+        # docker image rm al1fe/eng-bot
+        # docker-compose pull
+        # docker compose up
           
