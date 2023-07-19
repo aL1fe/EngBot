@@ -2,8 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env 
 WORKDIR /app
 
-COPY ./TelegramEngBot/TelegramEngBot.csproj .
-RUN dotnet restore TelegramEngBot.csproj
+COPY . .
+RUN dotnet restore TelegramEngBot/TelegramEngBot.csproj
 
 # Копирование файла Solution и восстановление зависимостей
 # COPY . .
