@@ -14,6 +14,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 
 # Копирование собранного приложения
+WORKDIR /app/out
 COPY --from=build-env /app/out .
 
 # Установка точки входа
