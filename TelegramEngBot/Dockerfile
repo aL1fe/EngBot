@@ -7,7 +7,7 @@ COPY . .
 RUN cd TelegramEngBot/TelegaEngBot && dotnet restore 
 
 # Сборка
-RUN dotnet publish -c Release -o out
+RUN cd TelegramEngBot/TelegaEngBot && dotnet publish -c Release -o out
 
 # Определение базового образа для запуска
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
