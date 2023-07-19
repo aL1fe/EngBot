@@ -16,20 +16,21 @@ jobs:
     - name: SSH into server, down containers and delete image
       uses: appleboy/ssh-action@master
       with:
-        host: 185.162.21.198 # ${{ secrets.SERVER_HOST }}
-        port: 8888
+        host: ${{ secrets.SERVER_HOST }}
+        port: ${{ secrets.SERVER_PORT }}
         username: ${{ secrets.SERVER_USERNAME }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
           cd /mnt/sdb/gitRepo/TelegramEngBot/deploy
           docker compose down
-    # docker image rm al1fe/eng-bot-bot
+    # docker image rm al1fe/eng-bot
 
-    # - name: Build Docker images
-      # run: |        
-        # docker build -t al1fe/eng-bot-bot -f ../TelegramEngBot/Dockerfile .       
-        # if ! docker image inspect al1fe/eng-bot-tts-model; then
-          # docker build -t al1fe/eng-bot-tts-model -f ../Tacotron2/Dockerfile .
+    - name: Build Docker images
+      run: |        
+        docker build -t al1fe/eng-bot -f ../TelegramEngBot/Dockerfile . 
+      
+        # if ! docker image inspect al1fe/tacotron2-model; then
+          # docker build -t al1fe/tacotron2-model -f ../Tacotron2/Dockerfile .
         # fi
         
     # - name: SSH into server and run containers

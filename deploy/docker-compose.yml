@@ -3,10 +3,7 @@ name: eng-bot
 services:
   bot:
     container_name: Eng-Bot
-    image: al1fe/eng-bot-bot  # image on docker hub
-    # build:
-      # context: ../TelegramEngBot
-      # dockerfile: Dockerfile
+    image: al1fe/eng-bot
     restart: always
     depends_on:
       - tts-model
@@ -18,16 +15,11 @@ services:
       BOT_TOKEN: 
       OPEN_AI_TOKEN: 
     volumes:
-      # - /mnt/sdb/EngBot/UserSecrets:/root/.microsoft/usersecrets:ro
       - /mnt/sdb/EngBot/logs:/app/logs
       
   tts-model:
     container_name: tts-tacotron2
-    image: al1fe/eng-bot-tts-model  # image on docker hub
-    # build:
-      # context: ../Tacotron2
-      # dockerfile: Dockerfile
-      # image: al1fe/eng-bot-tts-model
+    image: al1fe/tacotron2-model
     restart: always
     ports:
       - 8055:8000
