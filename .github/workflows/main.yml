@@ -29,6 +29,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
+          ls -la
           docker compose pull
           docker compose up
 
