@@ -27,7 +27,7 @@ jobs:
 
     - name: Build Docker images
       run: |        
-        docker build -t al1fe/eng-bot -f /mnt/sdb/gitRepo/TelegramEngBot/TelegramEngBot/Dockerfile .
+        docker build -t al1fe/eng-bot -f TelegramEngBot/Dockerfile .
       
         # if ! docker image inspect al1fe/tacotron2-model; then
           # docker build -t al1fe/tacotron2-model -f ../Tacotron2/Dockerfile .
