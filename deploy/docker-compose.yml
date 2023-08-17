@@ -11,16 +11,19 @@ services:
     environment:
       ENVIRONMENT: Production
       CONNECTION_STRING: Server=azure-sql-server;Database=Mnemonics;User ID=sa;Password=DZVW2cBqzfYAaHwAPhEg;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=true;      
-      NEURAL_MODEL_HOST: http://tts-tacotron2:8000
+      # NEURAL_MODEL_HOST: http://tts-tacotron2:8000
+      NEURAL_MODEL_HOST: http://tts-nemo:8000
       BOT_TOKEN: 
       OPEN_AI_TOKEN: 
     volumes:
       - /mnt/sdb/EngBot/logs:/app/logs
-      
+
   tts-model:
-    container_name: tts-tacotron2
-    # image: al1fe/tacotron2-model
-    image: al1fe/eng-bot-tts-model
+    # container_name: tts-tacotron2
+    # image: al1fe/eng-bot-tts-model
+
+    container_name: tts-nemo
+    image: al1fe/eng-bot-nemo
     restart: always
     ports:
       - 8055:8000
