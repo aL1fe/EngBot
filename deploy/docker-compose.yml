@@ -3,18 +3,19 @@ name: eng-bot
 services:
   bot:
     container_name: Eng-Bot
-    image: al1fe/eng-bot
+    image: eng-bot-bot
     restart: always
     depends_on:
       - tts-model
       - azure-sql-server
+    env_file: .env
     environment:
       ENVIRONMENT: Production
-      CONNECTION_STRING: Server=azure-sql-server;Database=Mnemonics;User ID=sa;Password=DZVW2cBqzfYAaHwAPhEg;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=true;      
+      CONNECTION_STRING: $CONNECTION_STRING    
       # NEURAL_MODEL_HOST: http://tts-tacotron2:8000
       NEURAL_MODEL_HOST: http://tts-nemo:8000
-      BOT_TOKEN: 
-      OPEN_AI_TOKEN: 
+      BOT_TOKEN: $BOT_TOKEN
+      OPEN_AI_TOKEN: $OPEN_AI_TOKEN
     volumes:
       - /mnt/sdb/EngBot/logs:/app/logs
 

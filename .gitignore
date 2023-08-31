@@ -457,3 +457,4 @@ TelegramEngBot_DB/
 .vs/
 Tacotron2/ffmpeg.exe
 Tacotron2/ffprobe.exe
+.env
