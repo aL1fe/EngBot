@@ -19,10 +19,8 @@ services:
     volumes:
       - /mnt/sdb/EngBot/logs:/app/logs
 
-  tts-model:
-    # container_name: tts-tacotron2
-    # image: al1fe/eng-bot-tts-model
 
+  tts-model:
     container_name: tts-nemo
     image: al1fe/eng-bot-nemo
     restart: always
