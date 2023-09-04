@@ -1,21 +1,22 @@
-# Определение базового образа для сборки
+# Set the main image
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env 
 WORKDIR /app
 
-# Копирование файла Solution и восстановление зависимостей
+# Copy everything
 COPY . .
-RUN cd TelegramEngBot/TelegaEngBot && dotnet restore 
 
-# Сборка
-RUN cd TelegramEngBot/TelegaEngBot && dotnet publish -c Release -o /app/out
+# Restore dependencies
+RUN dotnet restore
 
-# Определение базового образа для запуска
+# Build and publish a release
+RUN dotnet publish -c Release -o out
+
+# Set the main image to launch
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
-WORKDIR /app
 
-# Копирование собранного приложения
-WORKDIR /app/out
+# Build runtime image
+WORKDIR /app
 COPY --from=build-env /app/out .
 
-# Установка точки входа
+# Set entrypoint
 ENTRYPOINT ["dotnet", "TelegaEngBot.dll"]
