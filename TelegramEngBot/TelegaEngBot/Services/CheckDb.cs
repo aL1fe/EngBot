@@ -19,12 +19,23 @@ public class CheckDb
 
     public void CheckDbEmpty()
     {
-        if (_dbContext.CommonVocabulary.Any()) return;
-        Console.WriteLine("Database is empty.");
-        Logger.Fatal("Database is empty. Application was closed.");
-        Environment.Exit(0);
-        // Seeder.Seed(_dbContext);
-        // Console.WriteLine("Database was seeded with test values.");
+        while (true)
+        {
+            try
+            {
+                if (_dbContext.CommonVocabulary.Any()) return;
+                Console.WriteLine("Database is empty.");
+                Logger.Fatal("Database is empty. Application was closed.");
+                Environment.Exit(0);
+                // Seeder.Seed(_dbContext);
+                // Console.WriteLine("Database was seeded with test values.");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Database is unavailable.");
+                Thread.Sleep(10000);
+            }
+        }
     }
 
     public void MatchVocabulary()
