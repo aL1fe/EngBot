@@ -79,6 +79,7 @@ public class MessageHandler
 
                 _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
                               article.RusWord);
+                await GetNewWord();
             }
             catch (Exception e)
             {
@@ -86,8 +87,6 @@ public class MessageHandler
                 _logger.Error(e);
             }
         }
-
-        await GetNewWord();
     }
 
     public async Task NotKnow()
@@ -107,6 +106,7 @@ public class MessageHandler
 
                 _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
                                   article.RusWord);
+                await GetNewWord();
             }
             catch (Exception e)
             {
@@ -114,8 +114,6 @@ public class MessageHandler
                 _logger.Error(e);
             }
         }
-
-        await GetNewWord();
     }
 
     public async Task CambridgePron()
