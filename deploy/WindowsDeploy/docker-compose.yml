@@ -2,7 +2,7 @@ version: '3'
 name: eng-bot
 services:
   bot:
-    container_name: Eng-Bot
+    container_name: eng-bot
     image: al1fe/eng-bot
     restart: always
     # depends_on:
@@ -19,24 +19,25 @@ services:
       # - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
   # tts-model:
+    # container_name: tts-nemo
     # image: al1fe/text_to_speech/nvidia/nemo
     # restart: always
     # ports:
       # - 8055:8000
 
-  azure-sql-server:
-    container_name: mnemonics-sql-db
-    image: "mcr.microsoft.com/azure-sql-edge"
-    restart: always
-    ports:
-      - "1455:1433"
-    environment:
-      - SA_PASSWORD=$SA_PASSWORD
-      - ACCEPT_EULA=Y
-    volumes:
-      - ../../TelegramEngBot_DB:/var/opt/mssql/data
+  # azure-sql-server:
+    # container_name: mnemonics-sql-db
+    # image: "mcr.microsoft.com/azure-sql-edge"
+    # restart: always
+    # ports:
+      # - "1455:1433"
+    # environment:
+      # - SA_PASSWORD=$SA_PASSWORD
+      # - ACCEPT_EULA=Y
+    # volumes:
+      # - ../../TelegramEngBot_DB:/var/opt/mssql/data
 
-volumes:
-  eng_bot_db_data:
+# volumes:
+  # eng_bot_db_data:
   
 # docker build . --file Dockerfile -t al1fe/eng-bot
