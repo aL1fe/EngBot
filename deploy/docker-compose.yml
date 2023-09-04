@@ -34,7 +34,7 @@ services:
     ports:
       - "1455:1433"
     environment:
-      - SA_PASSWORD=DZVW2cBqzfYAaHwAPhEg
+      - SA_PASSWORD=$SA_PASSWORD
       - ACCEPT_EULA=Y
     volumes:
       - /mnt/sdb/EngBot/TelegramEngBot_DB:/var/opt/mssql/data
