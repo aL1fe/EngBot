@@ -3,16 +3,14 @@ name: eng-bot
 services:
   bot:
     container_name: Eng-Bot
-    image: eng-bot-bot
+    image: al1fe/eng-bot
     restart: always
-    depends_on:
+    # depends_on:
       # - tts-model
-      - azure-sql-server   
-    env_file: .env
+      # - azure-sql-server   
     environment:
       ENVIRONMENT: Production
       CONNECTION_STRING: $CONNECTION_STRING
-      # NEURAL_MODEL_HOST: http://tts-tacotron2:8000
       NEURAL_MODEL_HOST: http://tts-nemo:8000
       BOT_TOKEN: $BOT_TOKEN
       OPEN_AI_TOKEN: $OPEN_AI_TOKEN          
@@ -21,8 +19,7 @@ services:
       # - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
   # tts-model:
-    # container_name: tts-nemo
-    # image: al1fe/eng-bot-nemo
+    # image: al1fe/text_to_speech/nvidia/nemo
     # restart: always
     # ports:
       # - 8055:8000
@@ -41,3 +38,5 @@ services:
 
 volumes:
   eng_bot_db_data:
+  
+# docker build . --file Dockerfile -t al1fe/eng-bot
