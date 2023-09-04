@@ -83,8 +83,7 @@ class Program
                         + " FirstName: " + message.From.FirstName + " LastName: " + message.From.LastName);
             return;
         }
-
-        var mainErrorHandler = new MainErrorHandler();
+        
         try
         {
             // Check if user exist
@@ -114,7 +113,7 @@ class Program
                     await messageHandler.NotKnow();
                     break;
                 case "Pronunciation":
-                    messageHandler.TextToSpeech();
+                    await messageHandler.TextToSpeech();
                     break;
                 case "/smile":
                     user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
@@ -141,10 +140,12 @@ class Program
         }
         catch (Exception exception)
         {
-            await mainErrorHandler.HandleError(exception, botClient, message);
+            var mainErrorHandler = new MainErrorHandler(exception, botClient, message);
+            await mainErrorHandler.HandleError();
         }
     }
 }
+
 // https://t.me/my_aL1fe_bot
 // https://t.me/PhrasesAndWords_bot
 

@@ -7,22 +7,33 @@ namespace TelegaEngBot.Handlers;
 
 public class MainErrorHandler
 {
-    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private Exception _exception;
+    private ITelegramBotClient _botClient;
+    private Message _message;
 
-    public async Task HandleError(
+    public MainErrorHandler(
         Exception exception,
         ITelegramBotClient botClient,
         Message message)
     {
-        switch (exception)
+        _exception = exception;
+        _botClient = botClient;
+        _message = message;
+    }
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    public async Task HandleError()
+    {
+        switch (_exception)
         {
             case (Microsoft.Data.SqlClient.SqlException sqlException):
                 _logger.Error($"Database is unavailable.");
-                await botClient.SendTextMessageAsync(message.Chat.Id,
+                await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "<strong>Sorry. Database is unavailable. Please try again later.</strong>", ParseMode.Html);
                 break;
             default:
-                Console.WriteLine(exception.Message);
+                Console.WriteLine(_exception.Message);
                 break;
         }
     }
