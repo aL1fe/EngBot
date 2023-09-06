@@ -1,0 +1,15 @@
+version: '3'
+name: mnemonics
+services:
+  bot:
+    container_name: Eng-Bot
+    image: al1fe/eng-bot
+    restart: always
+    environment:
+      ENVIRONMENT: Production
+      CONNECTION_STRING: $CONNECTION_STRING    
+      NEURAL_MODEL_HOST: http://tts-nemo:8000
+      BOT_TOKEN: $BOT_TOKEN
+      OPEN_AI_TOKEN: $OPEN_AI_TOKEN
+    volumes:
+      - /mnt/sdb/Mnemonics/logs:/app/logs
