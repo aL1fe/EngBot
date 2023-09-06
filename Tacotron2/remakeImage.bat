@@ -1,1 +1,0 @@
-docker build -t aL1fe/eng-bot-tts-model .
