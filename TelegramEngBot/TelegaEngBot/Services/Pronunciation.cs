@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.Text.RegularExpressions;
+using NLog;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.Models;
 using Telegram.Bot;
@@ -41,7 +42,8 @@ public class Pronunciation
                 using var memoryStream = new MemoryStream();
                 await audioStream.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
-                await _botClient.SendAudioAsync(_message.Chat.Id, new InputOnlineFile(memoryStream, "Pronunciation.mp3"));
+                // await _botClient.SendAudioAsync(_message.Chat.Id, new InputOnlineFile(memoryStream, "Pronunciation.mp3"));
+                await _botClient.SendAudioAsync(_message.Chat.Id, new InputOnlineFile(memoryStream, GenerateFileName(query)));
             }
             else
             {
@@ -60,6 +62,13 @@ public class Pronunciation
         }
     }
 
+    static string GenerateFileName(string sentence)
+    {
+        var regex = new Regex("[^a-zA-Zа-яА-Я]");
+        var fileName = regex.Replace(sentence, "_") + ".mp3" ;
+        return fileName;
+    }
+    
     public static async Task PronUs(ITelegramBotClient botClient, Message message, Article article)
     {
         var engWordNormalized  = Validator.Normalize(article.EngWord);
@@ -87,8 +96,3 @@ public class Pronunciation
     
    
 }
-
-/* for testing
-greet
-
-*/

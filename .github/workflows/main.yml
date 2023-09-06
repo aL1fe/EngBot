@@ -12,31 +12,36 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    # - name: Build Docker images
-      # run: |        
-        # docker build -t al1fe/eng-bot -f TelegramEngBot/Dockerfile .
-      
-        # if ! docker image inspect al1fe/tacotron2-model; then
-          # docker build -t al1fe/tacotron2-model -f ../Tacotron2/Dockerfile .
-        # fi
+    
+    - name: Build the Docker image
+      working-directory: BackEnd
+      run: |
+        docker build -f Dockerfile -t al1fe/eng-bot .
         
-    # - name: SSH into server, down containers and delete image
-      # uses: appleboy/ssh-action@master
-      # with:
-        # host: ${{ secrets.SERVER_HOST }}
-        # port: ${{ secrets.SERVER_PORT }}
-        # username: ${{ secrets.SERVER_USERNAME }}
-        # password: ${{ secrets.SERVER_PASSWORD }}
-        # script: |
-          # ls -la
-          # docker compose pull
-          # docker compose up
+    - name: Save Docker image as tarball archive
+      run: |
+        docker save al1fe/eng-bot -o eng-bot.tar 
+    
+    - name: Copy files to the server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        port: ${{ secrets.SERVER_PORT }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        source: "deploy-bot/docker-compose.yml,eng-bot.tar"
+        target: "/mnt/sdb/Mnemonics/deploy/"
 
-
-        
-          # docker compose down
-          # docker image rm al1fe/eng-bot
-          # docker compose pull
-          # docker compose up
-          
+    - name: SSH into server, down container and delete image
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        port: ${{ secrets.SERVER_PORT }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          cd /mnt/sdb/Mnemonics/deploy/deploy-bot       # Change directory
+          docker compose down
+          docker image rm al1fe/eng-bot || true  # Delete image if exist
+          docker load -i ../eng-bot.tar          # Load docker image     
+          docker compose up -d  

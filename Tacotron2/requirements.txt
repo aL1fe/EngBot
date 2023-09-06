@@ -1,8 +1,0 @@
-speechbrain
-fastapi
-torchaudio
-uvicorn
-soundfile
-pydub
-torchvision
-py
