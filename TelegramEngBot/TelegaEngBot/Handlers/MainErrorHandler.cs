@@ -28,7 +28,7 @@ public class MainErrorHandler
         switch (_exception)
         {
             case (Microsoft.Data.SqlClient.SqlException sqlException):
-                _logger.Error($"Database is unavailable.");
+                _logger.Error("Database is unavailable.");
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "<strong>Sorry. Database is unavailable. Please try again later.</strong>", ParseMode.Html);
                 break;

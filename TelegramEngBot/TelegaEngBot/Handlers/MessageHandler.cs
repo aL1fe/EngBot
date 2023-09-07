@@ -7,7 +7,6 @@ using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaEngBot.Handlers;
@@ -24,7 +23,6 @@ public class MessageHandler
     private KeyboardButton _btnPron;
     private ReplyKeyboardMarkup _stdKbd;
     private ReplyKeyboardMarkup _extKbdPron;
-    private Article _lastArticle;
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -50,8 +48,6 @@ public class MessageHandler
         // Keyboards
         _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
         _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
-        
-        _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
     }
 
     public async Task Start()
@@ -77,8 +73,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
-                              article.RusWord);
+                _logger.Trace(
+                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
                 await GetNewWord();
             }
             catch (Exception e)
@@ -104,8 +100,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Sad smile
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
-                                  article.RusWord);
+                _logger.Trace(
+                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
                 await GetNewWord();
             }
             catch (Exception e)
@@ -133,13 +129,14 @@ public class MessageHandler
             _user.LastActivity = DateTime.Now;
             await _dbContext.SaveChangesAsync();
             await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+            await RedrawKeyboard(true);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             // add log todo
         }
-        await RedrawKeyboard(true);
+        
     }
 
     public async Task RedrawKeyboard(bool ifTypeWord) //todo
@@ -149,10 +146,11 @@ public class MessageHandler
         
         if (_user.UserSettings.IsPronunciationOn)
         {
+            // Draw extKbdPron keyboard
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _extKbdPron);
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
+                    replyMarkup: _extKbdPron);  
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "Click \"Pronunciation\" to listen word/phrase.",
@@ -160,10 +158,11 @@ public class MessageHandler
         }
         else
         {
+            // Draw stdKbd keyboard
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _stdKbd);
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
+                    replyMarkup: _stdKbd);
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "Button \"Pronunciation\" is " + (_user.UserSettings.IsPronunciationOn ? "On" : "Off"),
