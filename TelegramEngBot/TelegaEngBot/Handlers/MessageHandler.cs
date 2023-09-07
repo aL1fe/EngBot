@@ -23,7 +23,6 @@ public class MessageHandler
     private KeyboardButton _btnPron;
     private ReplyKeyboardMarkup _stdKbd;
     private ReplyKeyboardMarkup _extKbdPron;
-    private Article _lastArticle;
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -49,8 +48,6 @@ public class MessageHandler
         // Keyboards
         _stdKbd = new ReplyKeyboardMarkup(new[] {row1}) {ResizeKeyboard = true}; // [Know], [Don't know]
         _extKbdPron = new ReplyKeyboardMarkup(new[] {row1, row2}) {ResizeKeyboard = true}; // [Pronunciation]
-        
-        _lastArticle = _user.LastArticle;  // todo replace it instead article in methods
     }
 
     public async Task Start()
