@@ -31,6 +31,8 @@ class Program
         var botToken = AppConfig.BotToken;
         if (botToken != null)
         {
+            Console.WriteLine($"Bot token = ******{botToken.Substring(botToken.Length - 5)}");
+
             var botClient = new TelegramBotClient(botToken);
             
             using var cts = new CancellationTokenSource();
@@ -56,9 +58,6 @@ class Program
 
         Console.WriteLine("Press \"Enter\" to exit...");
         Console.Read();
-        _logger.Info("Stop listening bot.");
-        Console.WriteLine("Stop listening bot.");
-        await Task.Delay(1000);
     }
 
     private static async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -113,7 +112,7 @@ class Program
                     await messageHandler.NotKnow();
                     break;
                 case "Pronunciation":
-                    await messageHandler.TextToSpeech();
+                    messageHandler.TextToSpeech();
                     break;
                 case "/smile":
                     user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
