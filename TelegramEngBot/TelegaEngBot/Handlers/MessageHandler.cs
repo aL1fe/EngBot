@@ -7,7 +7,6 @@ using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaEngBot.Handlers;
@@ -133,13 +132,14 @@ public class MessageHandler
             _user.LastActivity = DateTime.Now;
             await _dbContext.SaveChangesAsync();
             await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+            await RedrawKeyboard(true);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             // add log todo
         }
-        await RedrawKeyboard(true);
+        
     }
 
     public async Task RedrawKeyboard(bool ifTypeWord) //todo
@@ -149,10 +149,11 @@ public class MessageHandler
         
         if (_user.UserSettings.IsPronunciationOn)
         {
+            // Draw extKbdPron keyboard
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _extKbdPron);
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
+                    replyMarkup: _extKbdPron);  
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "Click \"Pronunciation\" to listen word/phrase.",
@@ -160,10 +161,11 @@ public class MessageHandler
         }
         else
         {
+            // Draw stdKbd keyboard
             if (ifTypeWord)
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>",
-                    ParseMode.Html, replyMarkup: _stdKbd);
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
+                    replyMarkup: _stdKbd);
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "Button \"Pronunciation\" is " + (_user.UserSettings.IsPronunciationOn ? "On" : "Off"),
