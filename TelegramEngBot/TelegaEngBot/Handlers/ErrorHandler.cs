@@ -32,7 +32,8 @@ public static class ErrorHandler
                 $"OpenAI authentication error: {authException.Message}",
             _ => exception.ToString()
         };
-
+        
+        // Logging the same error message not fluently than one per second
         if (errorMessage != _lastErrorMessage || (DateTime.Now - _lastErrorTimestamp).TotalSeconds >= 1)
         {
             _lastErrorMessage = errorMessage;

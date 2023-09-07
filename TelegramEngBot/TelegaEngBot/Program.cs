@@ -45,13 +45,13 @@ class Program
             );
             
             var me = await botClient.GetMeAsync(cancellationToken: cts.Token);
-            _logger.Info("Start listening for @" + me.Username + ".");
-            Console.WriteLine("Start listening for @" + me.Username);
+            _logger.Info($"Start listening for @{me.Username}");
+            Console.WriteLine($"Start listening for @{me.Username}");
         }
         else
         {
-            _logger.Fatal("Bot token not found.");
-            Console.WriteLine("Bot token not found.");
+            _logger.Fatal("Bot token not found");
+            Console.WriteLine("Bot token not found");
         }
 
         if (AppConfig.Env == "Production") while (true) {}
@@ -77,9 +77,8 @@ class Program
             await botClient.SendTextMessageAsync(message.Chat.Id, 
                 "*Access denied.* You should request access and then restart bot using the command //start", 
                 ParseMode.Markdown);
-            _logger.Warn("New user tried to connect. User Id: "
-                        + message.From.Id + " Username: " + message.From.Username 
-                        + " FirstName: " + message.From.FirstName + " LastName: " + message.From.LastName);
+            _logger.Warn(
+                $"New user tried to connect. User Id: {message.From.Id}; Username: {message.From.Username}; FirstName: {message.From.FirstName}; LastName: {message.From.LastName}");
             return;
         }
         

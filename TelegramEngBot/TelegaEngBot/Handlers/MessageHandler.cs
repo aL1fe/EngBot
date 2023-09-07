@@ -73,8 +73,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
 
-                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
-                              article.RusWord);
+                _logger.Trace(
+                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
                 await GetNewWord();
             }
             catch (Exception e)
@@ -100,8 +100,8 @@ public class MessageHandler
                 if (_user.UserSettings.IsSmileOn) //Sad smile
                     await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                _logger.Trace("UserId: " + _message.Chat.Id + ", EngWord: " + article.EngWord + ", RusWord: " +
-                                  article.RusWord);
+                _logger.Trace(
+                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
                 await GetNewWord();
             }
             catch (Exception e)
