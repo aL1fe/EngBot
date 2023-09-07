@@ -4,13 +4,13 @@ services:
   bot:
     container_name: eng-bot
     image: al1fe/eng-bot
-    restart: always
+    restart: unless-stopped
     environment:
-      ENVIRONMENT: Production
-      CONNECTION_STRING: $CONNECTION_STRING
-      NEURAL_MODEL_HOST: http://tts-nemo:8000
-      BOT_TOKEN: $BOT_TOKEN
-      OPEN_AI_TOKEN: $OPEN_AI_TOKEN          
+      - ENVIRONMENT=Production
+      - CONNECTION_STRING=$CONNECTION_STRING
+      - NEURAL_MODEL_HOST=http://tts-nemo:8000
+      - BOT_TOKEN=$BOT_TOKEN
+      - OPEN_AI_TOKEN=$OPEN_AI_TOKEN          
     volumes:         
       - ../../../AppLogsAndDB/logs:/app/logs
   
