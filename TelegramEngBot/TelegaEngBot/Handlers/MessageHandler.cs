@@ -66,7 +66,7 @@ public class MessageHandler
 
                 if (userArticle.Weight > 1)
                 {
-                    userArticle.Weight--;
+                    userArticle.Weight -= AppConfig.KnowDecrease;
                     await _dbContext.SaveChangesAsync();
                 }
 
@@ -94,7 +94,7 @@ public class MessageHandler
             {
                 var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
-                userArticle.Weight++;
+                userArticle.Weight += AppConfig.NotKnowIncrease;
                 await _dbContext.SaveChangesAsync();
 
                 if (_user.UserSettings.IsSmileOn) //Sad smile
