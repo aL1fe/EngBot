@@ -1,8 +1,10 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore;
+using NLog;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Handlers;
 using TelegaEngBot.Identity;
+using TelegaEngBot.Models;
 using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -19,13 +21,15 @@ class Program
     static async Task Main()
     {
         _dbContext = new AppDbContext();
+        if (AppConfig.Env == "Production") 
+            await _dbContext.Database.MigrateAsync();
         
         // Check database is not empty and available
-        var check = new CheckDb(_dbContext);
-        check.CheckDbEmpty();
+        var check = new DatabaseService(_dbContext);
+        check.CheckDatabase();
 
         // Check if "user vocabulary" match "common vocabulary"
-        check.MatchVocabulary();
+        //check.MatchVocabulary();
 
         // TelegramBot init
         var botToken = AppConfig.BotToken;
@@ -84,13 +88,14 @@ class Program
         
         try
         {
-            // Check if user exist
             var user = _dbContext.UserList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
-            if (user == null) // If null Create User in database
+            var userService = new UserService(_dbContext, botClient, message);
+            
+            // Check if user exist
+            if (user == null)
             {
-                var userService = new UserService(_dbContext);
-                user = userService.CreateUser(message.From.Id, message);
-                message.Text = "/start";
+                await userService.CreateUser();
+                return;
             }
 
             //todo make check if last message is processed
@@ -99,6 +104,29 @@ class Program
             // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
             var messageHandler = new MessageHandler(botClient, message, _dbContext, user);
+            if (user.UserSettings.DifficultyLevel == null || !user.UserVocabulary.Any())
+            {
+                try
+                {
+                    var level = (Level)Enum.Parse(typeof(Level), message.Text);
+                    user.UserSettings.DifficultyLevel = level;
+                    await _dbContext.SaveChangesAsync();
+                    await userService.FillUserVocabularyAndShowNewArticle(user);
+                }
+                catch (ArgumentException)
+                {
+                    await botClient.SendTextMessageAsync(message.Chat.Id, "Please choose difficulty level.");
+                    return;
+                }
+                message.Text = "/start";
+            }
+
+            if (user.UserVocabulary.Average(x => x.Weight) < 5 
+                && user.UserVocabulary.Count != _dbContext.CommonVocabulary.Count()) // UserVocabulary has all the articles from CommonVocabulary
+            {
+                await userService.FillUserVocabularyAndShowNewArticle(user);
+            }
+            
             switch (message.Text)
             {
                 case "/start":
@@ -117,7 +145,7 @@ class Program
                     user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
                     await _dbContext.SaveChangesAsync();
                     await botClient.SendTextMessageAsync(message.Chat.Id,
-                        "Smiles is " + (user.UserSettings.IsSmileOn ? "On" : "Off"));
+                        $"Smiles is {(user.UserSettings.IsSmileOn ? "On" : "Off")}");
                     break;
                 case "/pronunciation":
                     user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
@@ -131,8 +159,11 @@ class Program
                     await messageHandler.CambridgePron();
                     break;
                 case "/ex":
-                    if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103)
+                    if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103 || message.Chat.Id == 906180277)
                         await messageHandler.Example();
+                    break;
+                case "/changeLevel":
+                    await userService.ChooseLanguageLevel(user);
                     break;
             }
         }
