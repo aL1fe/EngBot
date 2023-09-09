@@ -30,7 +30,7 @@ public class UserService
         {
             Id = new Guid(), 
             IsSmileOn = false, 
-            IsPronunciationOn = true,
+            IsPronunciationOn = false,
             DifficultyLevel = null
         };
 
@@ -41,9 +41,6 @@ public class UserService
             TelegramFirstName = _message.From.FirstName,
             TelegramLastName = _message.From.LastName,
             UserVocabulary = new List<UserVocabularyItem>(),
-            // UserVocabulary = _context.CommonVocabulary
-            //     .Select(article => new UserVocabularyItem {Article = article, Weight = 10})
-            //     .ToList(),
             UserSettings = userSettings,
             LastActivity = DateTime.Now
         };
@@ -56,18 +53,60 @@ public class UserService
 
     public async Task ChooseLanguageLevel(AppUser user)
     {
-        // Redraw keyboard
-        ReplyKeyboardMarkup keyboard = new(new[]
+        // Define number of difficulty level that consist in CommonVocabulary
+        var difficultyLevelList = _context.CommonVocabulary
+            .Select(c => c.DifficultyLevel) 
+            .Distinct()
+            .OrderBy(level => level) // sort by enum number
+            .ToList();
+
+        var colCount = 3;
+        var rowCount = (int)Math.Ceiling((double)difficultyLevelList.Count / colCount);
+        var index = 0; // Should be less than difficultyLevelList.Count
+        
+        // Matrix from button
+        var buttonArray = new Level[rowCount, colCount];
+        for (int i = 0; i < rowCount; i++)
         {
-            // new KeyboardButton[] {Level.BeginnerA1.ToString(), Level.ElementaryA2.ToString(), Level.IntermediateB1.ToString()},
-            // new KeyboardButton[] {Level.UpperIntermediateB2.ToString(), Level.AdvancedC1.ToString(), Level.ProficiencyC2.ToString()},
-            // new KeyboardButton[] {Level.Mnemonics1.ToString(), Level.Mnemonics2.ToString(), Level.Mnemonics3.ToString()},
-            
-            new KeyboardButton[] {Level.BeginnerA1.ToString(), Level.Mnemonics2.ToString()}
-        })
+            for (int j = 0; j < colCount; j++)
+            {
+                if (index < difficultyLevelList.Count)
+                {
+                    buttonArray[i, j] = difficultyLevelList[index];
+                    index++;
+                }
+                else
+                {
+                    break; // We use all the elements from difficultyLevelList
+                }
+            }
+        }
+
+        // Create a list of keyboard rows
+        var keyboardRows = new List<List<KeyboardButton>>();
+        index = 0;
+        for (int i = 0; i < rowCount; i++)
         {
-            ResizeKeyboard = true
-        };
+            var row = new List<KeyboardButton>();
+            for (int j = 0; j < colCount; j++)
+            {
+                if (index < difficultyLevelList.Count)
+                {
+                    var level = buttonArray[i, j];
+                    row.Add(new KeyboardButton(level.ToString()));
+                    index++;
+                }
+                else
+                {
+                    break; // We use all the elements from difficultyLevelList
+                }
+            }
+            keyboardRows.Add(row);
+        }
+
+        // Create the reply keyboard markup
+        var keyboard = new ReplyKeyboardMarkup(keyboardRows) {ResizeKeyboard = true};
+
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "Which level would you like to study?", replyMarkup: keyboard);
 
         // If this is old user we should make null UserSettings.DifficultyLevel to assign it later 

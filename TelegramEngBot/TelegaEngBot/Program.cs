@@ -121,8 +121,9 @@ class Program
                 message.Text = "/start";
             }
 
-            if (user.UserVocabulary.Average(x => x.Weight) < 5 
+            if (user.UserVocabulary.Average(x => x.Weight) < AppConfig.AverageWeight 
                 && user.UserVocabulary.Count != _dbContext.CommonVocabulary.Count()) // UserVocabulary has all the articles from CommonVocabulary
+            //maybe you want change dictionary
             {
                 await userService.FillUserVocabularyAndShowNewArticle(user);
             }
