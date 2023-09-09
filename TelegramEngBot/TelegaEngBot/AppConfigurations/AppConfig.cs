@@ -40,8 +40,8 @@ public static class AppConfig
     
     public static string OpenAIPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
 
-    public static readonly int Start = _configuration.GetValue<int>("Weight:Start");
-    public static readonly int KnowDecrease = _configuration.GetValue<int>("Weight:KnowDecrease");
-    public static readonly int NotKnowIncrease = _configuration.GetValue<int>("Weight:NotKnowIncrease");
-    public static readonly int AverageWeight = _configuration.GetValue<int>("Weight:AverageWeight");
+    public static int Start => _configuration.GetValue<int>("Weight:Start");
+    public static int KnowDecrease => _configuration.GetValue<int>("Weight:KnowDecrease");
+    public static int NotKnowIncrease => _configuration.GetValue<int>("Weight:NotKnowIncrease");
+    public static int AverageWeight => _configuration.GetValue<int>("Weight:AverageWeight");
 }
