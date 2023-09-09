@@ -163,7 +163,7 @@ class Program
                     if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103 || message.Chat.Id == 906180277)
                         await messageHandler.Example();
                     break;
-                case "/changeLevel":
+                case "/change":
                     await userService.ChooseLanguageLevel(user);
                     break;
             }
@@ -185,4 +185,15 @@ start - Restart
 smile - Smile On/Off
 pronunciation - Pronunciation On/Off
 hard - Show 10 hard-to-remember words
+*/
+
+// Menu test bot
+/*
+start - Restart
+smile - Smile On/Off
+pronunciation - Pronunciation On/Off
+hard - Show 10 hard-to-remember words
+camb - Cambridge pronunciation 
+ex - Example
+changeLevel - Change dictionary level
 */
