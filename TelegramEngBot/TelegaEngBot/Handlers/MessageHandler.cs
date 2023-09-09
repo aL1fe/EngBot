@@ -64,7 +64,7 @@ public class MessageHandler
             {
                 var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
-                if (userArticle.Weight > 1)
+                if (userArticle.Weight > AppConfig.KnowDecrease)
                 {
                     userArticle.Weight -= AppConfig.KnowDecrease;
                     await _dbContext.SaveChangesAsync();
