@@ -63,28 +63,9 @@ public class UserService
         var colCount = 3;
         var rowCount = (int)Math.Ceiling((double)difficultyLevelList.Count / colCount);
         var index = 0; // Should be less than difficultyLevelList.Count
-        
-        // Matrix from button
-        var buttonArray = new Level[rowCount, colCount];
-        for (int i = 0; i < rowCount; i++)
-        {
-            for (int j = 0; j < colCount; j++)
-            {
-                if (index < difficultyLevelList.Count)
-                {
-                    buttonArray[i, j] = difficultyLevelList[index];
-                    index++;
-                }
-                else
-                {
-                    break; // We use all the elements from difficultyLevelList
-                }
-            }
-        }
 
-        // Create a list of keyboard rows
+        // Create a matrix of keyboard button
         var keyboardRows = new List<List<KeyboardButton>>();
-        index = 0;
         for (int i = 0; i < rowCount; i++)
         {
             var row = new List<KeyboardButton>();
@@ -92,14 +73,12 @@ public class UserService
             {
                 if (index < difficultyLevelList.Count)
                 {
-                    var level = buttonArray[i, j];
+                    var level = difficultyLevelList[index];
                     row.Add(new KeyboardButton(level.ToString()));
                     index++;
                 }
                 else
-                {
                     break; // We use all the elements from difficultyLevelList
-                }
             }
             keyboardRows.Add(row);
         }
