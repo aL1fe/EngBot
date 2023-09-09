@@ -103,6 +103,7 @@ class Program
             // var updates = await botClient.GetUpdatesAsync();
             // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
+            // Сhoose difficulty level
             var messageHandler = new MessageHandler(botClient, message, _dbContext, user);
             if (user.UserSettings.DifficultyLevel == null || !user.UserVocabulary.Any())
             {
@@ -123,7 +124,6 @@ class Program
 
             if (user.UserVocabulary.Average(x => x.Weight) < AppConfig.AverageWeight 
                 && user.UserVocabulary.Count != _dbContext.CommonVocabulary.Count()) // UserVocabulary has all the articles from CommonVocabulary
-            //maybe you want change dictionary
             {
                 await userService.FillUserVocabularyAndShowNewArticle(user);
             }
@@ -160,7 +160,7 @@ class Program
                     await messageHandler.CambridgePron();
                     break;
                 case "/ex":
-                    if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103 || message.Chat.Id == 906180277)
+                    if (message.Chat.Id is 450056320 or 438560103 or 906180277)
                         await messageHandler.Example();
                     break;
                 case "/change":

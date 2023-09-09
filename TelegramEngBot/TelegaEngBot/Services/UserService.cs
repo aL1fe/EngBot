@@ -153,7 +153,7 @@ public class UserService
             if (user.UserSettings.IsPronunciationOn)
                 await tts.TextToSpeech(article);
         }
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's begin to learn. 👇👇👇 </strong>", ParseMode.Html);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's check ourselves. 👇👇👇 </strong>", ParseMode.Html);
     }
 
     //todo
