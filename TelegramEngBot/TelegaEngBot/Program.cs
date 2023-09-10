@@ -21,7 +21,7 @@ class Program
     static async Task Main()
     {
         _dbContext = new AppDbContext();
-        if (AppConfig.Env == "Production") 
+        //if (AppConfig.Env == "Production") 
             await _dbContext.Database.MigrateAsync();
         
         // Check database is not empty and available
@@ -117,6 +117,7 @@ class Program
                 catch (ArgumentException)
                 {
                     await botClient.SendTextMessageAsync(message.Chat.Id, "Please choose difficulty level.");
+                    await userService.ChooseLanguageLevel(user);
                     return;
                 }
                 message.Text = "/start";
@@ -189,11 +190,11 @@ hard - Show 10 hard-to-remember words
 
 // Menu test bot
 /*
+pronunciation - Pronunciation On/Off
+camb - Cambridge pronunciation 
+smile - Smile On/Off
+ex - Example
 start - Restart
 smile - Smile On/Off
-pronunciation - Pronunciation On/Off
-hard - Show 10 hard-to-remember words
-camb - Cambridge pronunciation 
-ex - Example
-changeLevel - Change dictionary level
+change - Change dictionary level
 */
