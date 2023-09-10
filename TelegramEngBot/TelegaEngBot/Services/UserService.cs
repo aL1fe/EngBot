@@ -127,16 +127,6 @@ public class UserService
                         x.DifficultyLevel == user.UserSettings.DifficultyLevel)
                     .Take(10);
         }
-
-        if (!newArticleToLearn.Any())
-        {
-            Console.WriteLine("CommonVocab for this level is empty");
-            return;
-        }
-        
-        // user.UserVocabulary = newArticleToLearn
-        //     .Select(x => new UserVocabularyItem {Article = x, Weight = 10})
-        //     .ToList();
         
         var newItemsToAdd = newArticleToLearn
             .Select(x => new UserVocabularyItem { Article = x, Weight = AppConfig.Start })
@@ -154,10 +144,5 @@ public class UserService
                 await tts.TextToSpeech(article);
         }
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's check ourselves. 👇👇👇 </strong>", ParseMode.Html);
-    }
-
-    //todo
-    public void ChangeUserLanguageVocabulary(int userId)
-    {
     }
 }

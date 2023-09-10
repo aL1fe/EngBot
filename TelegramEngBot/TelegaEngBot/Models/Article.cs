@@ -2,18 +2,18 @@
 
 public enum Level
 {
-    Mnemonics1,
-    Mnemonics2,
-    Mnemonics3,
-    BeginnerA1,
-    ElementaryA2,
-    PreIntermediate,
-    IntermediateB1,
-    UpperIntermediateB2,
-    AdvancedC1,
-    ProficiencyC2,
-    SetExpressions,
-    PhrasalVerbs
+    Mnemonics1 = 0,
+    Mnemonics2 = 1,
+    Mnemonics3 = 2,
+    BeginnerA1 = 3,
+    ElementaryA2 = 4,
+    PreIntermediate = 5,
+    IntermediateB1 = 6,
+    UpperIntermediateB2 = 7,
+    AdvancedC1 = 8,
+    ProficiencyC2 = 9,
+    SetExpressions = 10,
+    PhrasalVerbs = 11
 }
 
 public class Article
