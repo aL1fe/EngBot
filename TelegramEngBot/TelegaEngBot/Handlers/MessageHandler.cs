@@ -124,7 +124,7 @@ public class MessageHandler
         try
         {
             //if SynchroniseVocabularies todo
-            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
+            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary, _user.LastArticle).Article;
             _user.LastArticle = article;
             _user.LastActivity = DateTime.Now;
             await _dbContext.SaveChangesAsync();
