@@ -39,4 +39,9 @@ public static class AppConfig
             : _configuration["NeuralModelHost"];
     
     public static string OpenAIPromt => _configuration.GetSection("OpenAI")["OpenAIPromt"];
+
+    public static int Start => _configuration.GetValue<int>("Weight:Start");
+    public static int KnowDecrease => _configuration.GetValue<int>("Weight:KnowDecrease");
+    public static int NotKnowIncrease => _configuration.GetValue<int>("Weight:NotKnowIncrease");
+    public static int AverageWeight => _configuration.GetValue<int>("Weight:AverageWeight");
 }

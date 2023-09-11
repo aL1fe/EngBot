@@ -64,9 +64,9 @@ public class MessageHandler
             {
                 var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
-                if (userArticle.Weight > 1)
+                if (userArticle.Weight > AppConfig.KnowDecrease)
                 {
-                    userArticle.Weight--;
+                    userArticle.Weight -= AppConfig.KnowDecrease;
                     await _dbContext.SaveChangesAsync();
                 }
 
@@ -94,7 +94,7 @@ public class MessageHandler
             {
                 var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
-                userArticle.Weight++;
+                userArticle.Weight += AppConfig.NotKnowIncrease;
                 await _dbContext.SaveChangesAsync();
 
                 if (_user.UserSettings.IsSmileOn) //Sad smile
@@ -124,7 +124,7 @@ public class MessageHandler
         try
         {
             //if SynchroniseVocabularies todo
-            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
+            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary, _user.LastArticle).Article;
             _user.LastArticle = article;
             _user.LastActivity = DateTime.Now;
             await _dbContext.SaveChangesAsync();
