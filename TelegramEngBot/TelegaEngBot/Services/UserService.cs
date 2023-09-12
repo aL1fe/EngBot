@@ -108,7 +108,7 @@ public class UserService
         IQueryable<Article> newArticleToLearn;
         if (user.UserVocabulary.Any())
         {
-            // Add only new article
+            // Add only new article witch absent in user vocabulary
             var existingUserVocabularyWords = 
                 user.UserVocabulary.Select(uv => uv.Article.EngWord).ToList();
 
