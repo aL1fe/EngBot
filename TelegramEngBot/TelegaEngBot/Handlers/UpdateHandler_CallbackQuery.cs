@@ -1,12 +1,7 @@
 using NLog;
-using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
-using TelegaEngBot.Identity;
-using TelegaEngBot.Models;
-using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 public class UpdateHandler_CallbackQuery
 {

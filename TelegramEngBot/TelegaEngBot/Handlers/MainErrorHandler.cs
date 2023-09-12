@@ -1,5 +1,6 @@
 using NLog;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -27,10 +28,14 @@ public class MainErrorHandler
     {
         switch (_exception)
         {
-            case (Microsoft.Data.SqlClient.SqlException sqlException):
-                _logger.Error("Database is unavailable.");
+            case Microsoft.Data.SqlClient.SqlException sqlException:
+                _logger.Error("Database is unavailable");
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "<strong>Sorry. Database is unavailable. Please try again later.</strong>", ParseMode.Html);
+                break;
+            case ApiRequestException apiException when (apiException.Message.Contains("Forbidden: bot was blocked by the user")):
+                _logger.Error("Forbidden: bot was blocked by the user");
+                Console.WriteLine(_exception.Message);
                 break;
             default:
                 Console.WriteLine(_exception.Message);
