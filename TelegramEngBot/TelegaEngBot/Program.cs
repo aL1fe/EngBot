@@ -35,7 +35,7 @@ class Program
         var botToken = AppConfig.BotToken;
         if (botToken != null)
         {
-            Console.WriteLine($"Bot token = ******{botToken.Substring(botToken.Length - 5)}");
+            Console.WriteLine($"Bot token = ******{botToken.Substring(botToken.Length - 5)}"); // Show 5 symbols of bot token
 
             var botClient = new TelegramBotClient(botToken);
             
@@ -72,27 +72,13 @@ class Program
         {
             var updateHandlerMessage = new UpdateHandler_Message(botClient, update.Message, _dbContext);
             await updateHandlerMessage.HandleMessage();
+            return;
+        }
+        
+        if (update.Type == UpdateType.CallbackQuery)
+        {
+            var handleCallbackQuery = new UpdateHandler_CallbackQuery(botClient, update.CallbackQuery, _dbContext);
+            await handleCallbackQuery.HandleCallbackQuery();
         }
     }
 }
-// https://t.me/my_aL1fe_bot
-// https://t.me/PhrasesAndWords_bot
-
-// Menu
-/*
-start - Restart
-smile - Smile On/Off
-pronunciation - Pronunciation On/Off
-hard - Show 10 hard-to-remember words
-*/
-
-// Menu test bot
-/*
-pronunciation - Pronunciation On/Off
-camb - Cambridge pronunciation 
-smile - Smile On/Off
-ex - Example
-start - Restart
-smile - Smile On/Off
-change - Change dictionary level
-*/
