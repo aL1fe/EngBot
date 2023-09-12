@@ -11,7 +11,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaEngBot.Handlers;
 
-public class MessageHandler
+public class UserMessageHandler
 {
     private ITelegramBotClient _botClient;
     private Message _message;
@@ -26,7 +26,7 @@ public class MessageHandler
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public MessageHandler(
+    public UserMessageHandler(
         ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
