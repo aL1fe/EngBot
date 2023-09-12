@@ -124,7 +124,7 @@ public class UpdateHandler_Message
         }
         catch (Exception exception)
         {
-            var mainErrorHandler = new MainErrorHandler(exception, _botClient, _message);
+            var mainErrorHandler = new AppErrorHandler(exception, _botClient, _message);
             await mainErrorHandler.HandleError();
         }
     }
