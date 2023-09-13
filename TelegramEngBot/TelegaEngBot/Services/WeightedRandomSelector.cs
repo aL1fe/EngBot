@@ -17,7 +17,6 @@ public class WeightedRandomSelector
             if (randomWeight >= cumulativeWeight) continue;
 
             if (userVocabularyItem.Article != lastArticle) return userVocabularyItem; // Check if random choose the previous article
-            random = new Random();
             var randomItem = random.Next(0, userVocabulary.Count);
             return userVocabulary[randomItem];                                          // Return random item
             // return userVocabulary.OrderByDescending(x => x.Weight).FirstOrDefault(); // Return item with max weight
