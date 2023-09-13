@@ -13,7 +13,8 @@ public enum Level
     AdvancedC1 = 8,
     ProficiencyC2 = 9,
     SetExpressions = 10,
-    PhrasalVerbs = 11
+    PhrasalVerbs = 11,
+    StreamsShiza = 12
 }
 
 public class Article
