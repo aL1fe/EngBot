@@ -43,7 +43,7 @@ class Program
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(
                 HandleUpdate,
-                ErrorHandler.HandleError,
+                BotErrorHandler.HandleError,
                 receiverOptions,
                 cancellationToken: cts.Token
             );
