@@ -9,7 +9,7 @@ public class IdentityServer
     }
     public bool CheckAuth()
     {
-        return true; // identity off
+        // return true; // identity off
         
         if (_id == 450056320 
             || _id == 906180277 //Alenchik

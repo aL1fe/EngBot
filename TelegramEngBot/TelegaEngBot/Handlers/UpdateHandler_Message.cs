@@ -28,16 +28,16 @@ public class UpdateHandler_Message
     public async Task HandleMessage()
     {
         // Identity
-        var identity = new IdentityServer(_message.From.Id);
-        if (!identity.CheckAuth())
-        {
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, 
-                "*Access denied.* You should request access and then restart bot using the command //start", 
-                ParseMode.Markdown);
-            _logger.Warn(
-                $"New user tried to connect. User Id: {_message.From.Id}; Username: {_message.From.Username}; FirstName: {_message.From.FirstName}; LastName: {_message.From.LastName}");
-            return;
-        }
+        // var identity = new IdentityServer(_message.From.Id);
+        // if (!identity.CheckAuth())
+        // {
+        //     await _botClient.SendTextMessageAsync(_message.Chat.Id, 
+        //         "*Access denied.* You should request access and then restart bot using the command //start", 
+        //         ParseMode.Markdown);
+        //     _logger.Warn(
+        //         $"New user tried to connect. User Id: {_message.From.Id}; Username: {_message.From.Username}; FirstName: {_message.From.FirstName}; LastName: {_message.From.LastName}");
+        //     return;
+        // }
         
         try
         {
