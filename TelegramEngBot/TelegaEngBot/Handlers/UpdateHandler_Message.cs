@@ -57,7 +57,7 @@ public class UpdateHandler_Message
             // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
 
             // Сhoose difficulty level
-            var messageHandler = new UserMessageHandler(_botClient, _message, _dbContext, user);
+            var messageHandler = new AppMessageHandler(_botClient, _message, _dbContext, user);
             if (user.UserSettings.DifficultyLevel == null || !user.UserVocabulary.Any())
             {
                 try
