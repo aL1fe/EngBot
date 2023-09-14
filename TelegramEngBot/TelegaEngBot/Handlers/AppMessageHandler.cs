@@ -146,8 +146,7 @@ public class AppMessageHandler
             }
             else
 
-                await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "Button \"Pronunciation\" is " + (_user.UserSettings.IsPronunciationOn ? "On" : "Off"),
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "Button \"Pronunciation\" is Off",
                     ParseMode.Html, replyMarkup: _stdKbd);
         }
     }
