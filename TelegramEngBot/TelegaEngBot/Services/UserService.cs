@@ -50,6 +50,18 @@ public class UserService
 
         await ChooseLanguageLevel(user);
     }
+    
+    public async Task ConfirmAction()
+    {
+        ReplyKeyboardMarkup keyboard = new(new[]
+        {
+            new KeyboardButton[] {"Yes, I want to change", "No, I didn't"}
+        })
+        {
+            ResizeKeyboard = true
+        };
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "Your current vocabulary will be replaced with a new one!", replyMarkup: keyboard);
+    }
 
     public async Task ChooseLanguageLevel(AppUser user)
     {

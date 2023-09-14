@@ -51,12 +51,7 @@ public class UpdateHandler_Message
                 return;
             }
 
-            //todo make check if last message is processed
-            //check unhandled updates (messages)
-            // var updates = await botClient.GetUpdatesAsync();
-            // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
-
-            // Сhoose difficulty level
+            // Choose difficulty level if needed
             var messageHandler = new AppMessageHandler(_botClient, _message, _dbContext, user);
             if (user.UserSettings.DifficultyLevel == null || !user.UserVocabulary.Any())
             {
@@ -66,6 +61,7 @@ public class UpdateHandler_Message
                     user.UserSettings.DifficultyLevel = level;
                     await _dbContext.SaveChangesAsync();
                     await userService.FillUserVocabularyAndShowNewArticle(user);
+                    _message.Text = "/start";
                 }
                 catch (ArgumentException)
                 {
@@ -73,14 +69,12 @@ public class UpdateHandler_Message
                     await userService.ChooseLanguageLevel(user);
                     return;
                 }
-                _message.Text = "/start";
             }
 
-            if (user.UserVocabulary.Average(x => x.Weight) < AppConfig.AverageWeight 
+            // Add new words for user to check
+            if (user.UserVocabulary.Average(x => x.Weight) < AppConfig.AverageWeight
                 && user.UserVocabulary.Count != _dbContext.CommonVocabulary.Count()) // UserVocabulary has all the articles from CommonVocabulary
-            {
                 await userService.FillUserVocabularyAndShowNewArticle(user);
-            }
             
             switch (_message.Text)
             {
@@ -118,7 +112,13 @@ public class UpdateHandler_Message
                         await messageHandler.Example();
                     break;
                 case "/change":
+                    await userService.ConfirmAction();
+                    break;
+                case "Yes, I want to change":
                     await userService.ChooseLanguageLevel(user);
+                    break;
+                default:
+                    await messageHandler.Start();
                     break;
             }
         }
