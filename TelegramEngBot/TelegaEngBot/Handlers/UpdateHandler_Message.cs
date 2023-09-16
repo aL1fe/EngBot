@@ -27,20 +27,20 @@ public class UpdateHandler_Message
     
     public async Task HandleMessage()
     {
-        // Identity
-        // var identity = new IdentityServer(_message.From.Id);
-        // if (!identity.CheckAuth())
-        // {
-        //     await _botClient.SendTextMessageAsync(_message.Chat.Id, 
-        //         "*Access denied.* You should request access and then restart bot using the command //start", 
-        //         ParseMode.Markdown);
-        //     _logger.Warn(
-        //         $"New user tried to connect. User Id: {_message.From.Id}; Username: {_message.From.Username}; FirstName: {_message.From.FirstName}; LastName: {_message.From.LastName}");
-        //     return;
-        // }
-        
-        try
+        try  // main try catch block
         {
+            // Identity
+            // var identity = new IdentityServer(_message.From.Id);
+            // if (!identity.CheckAuth())
+            // {
+            //     await _botClient.SendTextMessageAsync(_message.Chat.Id, 
+            //         "*Access denied.* You should request access and then restart bot using the command //start", 
+            //         ParseMode.Markdown);
+            //     _logger.Warn(
+            //         $"New user tried to connect. User Id: {_message.From.Id}; Username: {_message.From.Username}; FirstName: {_message.From.FirstName}; LastName: {_message.From.LastName}");
+            //     return;
+            // }
+            
             var user = _dbContext.UserList.FirstOrDefault(x => x.TelegramUserId == _message.From.Id);
             var userService = new UserService(_dbContext, _botClient, _message);
             
@@ -78,17 +78,9 @@ public class UpdateHandler_Message
             
             switch (_message.Text)
             {
+                /* Handle Menu input */
                 case "/start":
                     await messageHandler.Start();
-                    break;
-                case "Know":
-                    await messageHandler.Know();
-                    break;
-                case "Don't know":
-                    await messageHandler.NotKnow();
-                    break;
-                case "Pronunciation":
-                    messageHandler.TextToSpeech();
                     break;
                 case "/smile":
                     user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
@@ -114,11 +106,26 @@ public class UpdateHandler_Message
                 case "/change":
                     await userService.ConfirmAction();
                     break;
+                /* Admin part */
+                case "last":
+                    if (_message.Chat.Id is 450056320)
+                        await messageHandler.LastActivity();
+                    break;
+                /* Handle button input */
+                case "Know":
+                    await messageHandler.Know();
+                    break;
+                case "Don't know":
+                    await messageHandler.NotKnow();
+                    break;
+                case "Pronunciation":
+                    messageHandler.TextToSpeech();  // Remove await not to block thread
+                    break;
                 case "Yes, I want to change":
                     await userService.ChooseLanguageLevel(user);
                     break;
                 default:
-                    await messageHandler.Start();
+                    await messageHandler.GetLastArticle();
                     break;
             }
         }

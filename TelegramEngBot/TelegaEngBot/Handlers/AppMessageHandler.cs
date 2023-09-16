@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using NLog;
 using OpenAI_API;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
@@ -52,7 +53,7 @@ public class AppMessageHandler
 
     public async Task Start()
     {
-        await GetNewWord();
+        await GetNewArticle();
     }
 
     public async Task Know()
@@ -73,7 +74,7 @@ public class AppMessageHandler
 
             _logger.Trace(
                 $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
-            await GetNewWord();
+            await GetNewArticle();
         }
     }
 
@@ -92,7 +93,7 @@ public class AppMessageHandler
 
             _logger.Trace(
                 $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
-            await GetNewWord();
+            await GetNewArticle();
         }
     }
 
@@ -103,11 +104,19 @@ public class AppMessageHandler
         await Pronunciation.PronUs(_botClient, _message, article);
     }
 
-    private async Task GetNewWord()
+    private async Task GetNewArticle()
     {
-        //if SynchroniseVocabularies todo
         var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary, _user.LastArticle).Article;
         _user.LastArticle = article;
+        _user.LastActivity = DateTime.Now;
+        await _dbContext.SaveChangesAsync();
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+        await RedrawKeyboard(true);
+    }
+
+    public async Task GetLastArticle()
+    {
+        var article = _user.LastArticle;
         _user.LastActivity = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
@@ -165,7 +174,10 @@ public class AppMessageHandler
             if (_user.UserSettings.IsPronunciationOn)
                 await tts.TextToSpeech(hardWord.Article);
         }
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+        
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's continue. 👇👇👇 </strong>", ParseMode.Html);
+        await GetLastArticle();
+        //await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
     public async Task TextToSpeech()
@@ -185,5 +197,21 @@ public class AppMessageHandler
 
         var response = await conversation.GetResponseFromChatbotAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, response, ParseMode.Html);
+    }
+
+    public async Task LastActivity()
+    {
+        var lastActivity = _dbContext.UserList.Max(x => x.LastActivity);
+        var user = _dbContext.UserList
+            .FirstOrDefault(x => x.LastActivity == lastActivity);
+
+        // convert UTC to local time zone
+        var localTimeZone = TimeZoneInfo.Local;
+        lastActivity = localTimeZone.IsDaylightSavingTime(DateTime.Now)
+            ? lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours - 1)
+            : lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours);
+        
+        await _botClient.SendTextMessageAsync(_message.Chat.Id,
+            $"{user.TelegramFirstName} - {lastActivity.ToString("dd/MM/yyyy HH:mm:ss")}");
     }
 }
