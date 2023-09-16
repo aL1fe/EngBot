@@ -58,6 +58,8 @@ public class UpdateHandler_Message
                 try
                 {
                     var level = (Level)Enum.Parse(typeof(Level), _message.Text);
+                    if (!_dbContext.CommonVocabulary.Any(x => x.DifficultyLevel == level))
+                        throw new ArgumentException();
                     user.UserSettings.DifficultyLevel = level;
                     await _dbContext.SaveChangesAsync();
                     await userService.FillUserVocabularyAndShowNewArticle(user);
