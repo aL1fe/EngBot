@@ -111,6 +111,7 @@ public class AppMessageHandler
         _user.LastActivity = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇");
         await RedrawKeyboard(true);
     }
 
@@ -120,6 +121,7 @@ public class AppMessageHandler
         _user.LastActivity = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇");
         await RedrawKeyboard(true);
     }
 
