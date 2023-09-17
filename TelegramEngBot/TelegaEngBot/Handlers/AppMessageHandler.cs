@@ -111,7 +111,7 @@ public class AppMessageHandler
         _user.LastActivity = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇");
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇 ❓");
         await RedrawKeyboard(true);
     }
 
@@ -121,7 +121,7 @@ public class AppMessageHandler
         _user.LastActivity = DateTime.Now;
         await _dbContext.SaveChangesAsync();
         await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇");
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇 ❓");
         await RedrawKeyboard(true);
     }
 
@@ -138,7 +138,7 @@ public class AppMessageHandler
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html,
                     replyMarkup: _extKbdPron);
-                await _botClient.SendTextMessageAsync(_message.Chat.Id, "  👆 ❓ 🧐");
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "👆 ❓ 🧐");
             }
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
@@ -153,7 +153,7 @@ public class AppMessageHandler
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html,
                     replyMarkup: _stdKbd);
-                await _botClient.SendTextMessageAsync(_message.Chat.Id, "  👆 ❓ 🧐");
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "👆 ❓ 🧐");
             }
             else
 
