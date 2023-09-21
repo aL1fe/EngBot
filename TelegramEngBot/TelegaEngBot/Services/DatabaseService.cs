@@ -7,17 +7,17 @@ using TelegaEngBot.Models;
 
 namespace TelegaEngBot.Services;
 
-public class CheckDb
+public class DatabaseService
 {
     private AppDbContext _dbContext;
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public CheckDb(AppDbContext dbContext)
+    public DatabaseService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public void CheckDbEmpty()
+    public void CheckDatabase()
     {
         while (true)
         {

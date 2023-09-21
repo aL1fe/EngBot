@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using NLog;
 using OpenAI_API;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
@@ -11,7 +12,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaEngBot.Handlers;
 
-public class MessageHandler
+public class AppMessageHandler
 {
     private ITelegramBotClient _botClient;
     private Message _message;
@@ -26,7 +27,7 @@ public class MessageHandler
     
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public MessageHandler(
+    public AppMessageHandler(
         ITelegramBotClient botClient,
         Message message,
         AppDbContext dbContext,
@@ -52,7 +53,7 @@ public class MessageHandler
 
     public async Task Start()
     {
-        await GetNewWord();
+        await GetNewArticle();
     }
 
     public async Task Know()
@@ -60,28 +61,20 @@ public class MessageHandler
         var article = _user.LastArticle;
         if (article != null)
         {
-            try
+            var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
+
+            if (userArticle.Weight > AppConfig.KnowDecrease)
             {
-                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
-
-                if (userArticle.Weight > 1)
-                {
-                    userArticle.Weight--;
-                    await _dbContext.SaveChangesAsync();
-                }
-
-                if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
-                    await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
-
-                _logger.Trace(
-                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
-                await GetNewWord();
+                userArticle.Weight -= AppConfig.KnowDecrease;
+                await _dbContext.SaveChangesAsync();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                _logger.Error(e);
-            }
+
+            if (_user.UserSettings.IsSmileOn) //Happy smile https://apps.timwhitlock.info/emoji/tables/unicode
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F642));
+
+            _logger.Trace(
+                $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
+            await GetNewArticle();
         }
     }
 
@@ -90,25 +83,17 @@ public class MessageHandler
         var article = _user.LastArticle;
         if (article != null)
         {
-            try
-            {
-                var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
+            var userArticle = _user.UserVocabulary.FirstOrDefault(x => x.Article == article);
 
-                userArticle.Weight++;
-                await _dbContext.SaveChangesAsync();
+            userArticle.Weight += AppConfig.NotKnowIncrease;
+            await _dbContext.SaveChangesAsync();
 
-                if (_user.UserSettings.IsSmileOn) //Sad smile
-                    await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
+            if (_user.UserSettings.IsSmileOn) //Sad smile
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, char.ConvertFromUtf32(0x1F622));
 
-                _logger.Trace(
-                    $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
-                await GetNewWord();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                _logger.Error(e);
-            }
+            _logger.Trace(
+                $"UserId: {_message.Chat.Id}, UserFirstName: {_message.Chat.FirstName}; EngWord: {article.EngWord}, RusWord: {article.RusWord}");
+            await GetNewArticle();
         }
     }
 
@@ -118,39 +103,43 @@ public class MessageHandler
         if (article == null) return;
         await Pronunciation.PronUs(_botClient, _message, article);
     }
-    
-    private async Task GetNewWord()
+
+    private async Task GetNewArticle()
     {
-        try
-        {
-            //if SynchroniseVocabularies todo
-            var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary).Article;
-            _user.LastArticle = article;
-            _user.LastActivity = DateTime.Now;
-            await _dbContext.SaveChangesAsync();
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
-            await RedrawKeyboard(true);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            // add log todo
-        }
-        
+        var article = WeightedRandomSelector.SelectArticle(_user.UserVocabulary, _user.LastArticle).Article;
+        _user.LastArticle = article;
+        _user.LastActivity = DateTime.Now;
+        await _dbContext.SaveChangesAsync();
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇 ❓");
+        await RedrawKeyboard(true);
+    }
+
+    public async Task GetLastArticle()
+    {
+        var article = _user.LastArticle;
+        _user.LastActivity = DateTime.Now;
+        await _dbContext.SaveChangesAsync();
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, article.RusWord);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "👇 ❓");
+        await RedrawKeyboard(true);
     }
 
     public async Task RedrawKeyboard(bool ifTypeWord) //todo
     {
         var article = _user.LastArticle;
         if (article == null) return;
-        
+
         if (_user.UserSettings.IsPronunciationOn)
         {
             // Draw extKbdPron keyboard
             if (ifTypeWord)
+            {
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
-                    replyMarkup: _extKbdPron);  
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html,
+                    replyMarkup: _extKbdPron);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "👆 ❓ 🧐");
+            }
             else
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
                     "Click \"Pronunciation\" to listen word/phrase.",
@@ -160,12 +149,15 @@ public class MessageHandler
         {
             // Draw stdKbd keyboard
             if (ifTypeWord)
+            {
                 await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html, 
+                    "<tg-spoiler>" + article.EngWord + "</tg-spoiler>", ParseMode.Html,
                     replyMarkup: _stdKbd);
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "👆 ❓ 🧐");
+            }
             else
-                await _botClient.SendTextMessageAsync(_message.Chat.Id,
-                    "Button \"Pronunciation\" is " + (_user.UserSettings.IsPronunciationOn ? "On" : "Off"),
+
+                await _botClient.SendTextMessageAsync(_message.Chat.Id, "Button \"Pronunciation\" is Off",
                     ParseMode.Html, replyMarkup: _stdKbd);
         }
     }
@@ -184,7 +176,10 @@ public class MessageHandler
             if (_user.UserSettings.IsPronunciationOn)
                 await tts.TextToSpeech(hardWord.Article);
         }
-        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
+        
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's continue. 👇👇👇 </strong>", ParseMode.Html);
+        await GetLastArticle();
+        //await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> Press /start to continue...</strong>", ParseMode.Html);
     }
 
     public async Task TextToSpeech()
@@ -201,14 +196,24 @@ public class MessageHandler
         var conversation = openAi.Chat.CreateConversation();
         conversation.AppendUserInput(
             $"Give me 3 examples with \"{article.EngWord}\" for beginner level. The length of each example is no more than 20 words. Mark {article.EngWord} like <b><i>{article.EngWord}</i></b>.");
-        try
-        {
-            var response = await conversation.GetResponseFromChatbotAsync();
-            await _botClient.SendTextMessageAsync(_message.Chat.Id, response, ParseMode.Html);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+
+        var response = await conversation.GetResponseFromChatbotAsync();
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, response, ParseMode.Html);
+    }
+
+    public async Task LastActivity()
+    {
+        var lastActivity = _dbContext.UserList.Max(x => x.LastActivity);
+        var user = _dbContext.UserList
+            .FirstOrDefault(x => x.LastActivity == lastActivity);
+
+        // convert UTC to local time zone
+        var localTimeZone = TimeZoneInfo.Local;
+        lastActivity = localTimeZone.IsDaylightSavingTime(DateTime.Now)
+            ? lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours - 1)
+            : lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours);
+        
+        await _botClient.SendTextMessageAsync(_message.Chat.Id,
+            $"{user.TelegramFirstName} - {lastActivity.ToString("dd/MM/yyyy HH:mm:ss")}");
     }
 }

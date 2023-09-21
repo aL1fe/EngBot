@@ -1,0 +1,19 @@
+https://t.me/my_aL1fe_bot - prod bot
+https://t.me/PhrasesAndWords_bot - test bot
+
+// Menu prod bot
+pronunciation - Pronunciation On/Off
+hard - Show 10 hard-to-remember words
+start - Restart
+smile - Smile On/Off
+change - Change dictionary level
+
+
+// Menu test bot
+pronunciation - Pronunciation On/Off
+camb - Cambridge pronunciation 
+hard - Show 10 hard-to-remember words
+ex - Example
+start - Restart
+smile - Smile On/Off
+change - Change dictionary level

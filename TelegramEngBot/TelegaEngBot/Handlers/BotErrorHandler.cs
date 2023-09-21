@@ -4,7 +4,7 @@ using Telegram.Bot.Exceptions;
 
 namespace TelegaEngBot.Handlers;
 
-public static class ErrorHandler
+public static class BotErrorHandler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static string _lastErrorMessage = string.Empty;
@@ -28,8 +28,8 @@ public static class ErrorHandler
                 $"HTTP request error: {httpException.Message}",
             System.Net.WebException webException =>
                 $"Web error: {webException.Message}",
-            System.Security.Authentication.AuthenticationException authException =>
-                $"OpenAI authentication error: {authException.Message}",
+            // System.Security.Authentication.AuthenticationException authException =>
+            //     $"OpenAI authentication error: {authException.Message}",
             _ => exception.ToString()
         };
         
@@ -40,7 +40,7 @@ public static class ErrorHandler
             _lastErrorTimestamp = DateTime.Now;
 
             Logger.Warn(errorMessage);
-            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ms") + " " + errorMessage);
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss.ms} {errorMessage}");
         }
         
         return Task.CompletedTask;

@@ -1,8 +1,10 @@
-﻿using NLog;
+﻿using Microsoft.EntityFrameworkCore;
+using NLog;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Handlers;
 using TelegaEngBot.Identity;
+using TelegaEngBot.Models;
 using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -19,19 +21,21 @@ class Program
     static async Task Main()
     {
         _dbContext = new AppDbContext();
+        //if (AppConfig.Env == "Production") 
+            await _dbContext.Database.MigrateAsync();
         
         // Check database is not empty and available
-        var check = new CheckDb(_dbContext);
-        check.CheckDbEmpty();
+        var check = new DatabaseService(_dbContext);
+        check.CheckDatabase();
 
         // Check if "user vocabulary" match "common vocabulary"
-        check.MatchVocabulary();
+        //check.MatchVocabulary();
 
         // TelegramBot init
         var botToken = AppConfig.BotToken;
         if (botToken != null)
         {
-            Console.WriteLine($"Bot token = ******{botToken.Substring(botToken.Length - 5)}");
+            Console.WriteLine($"Bot token = ******{botToken.Substring(botToken.Length - 5)}"); // Show 5 symbols of bot token
 
             var botClient = new TelegramBotClient(botToken);
             
@@ -39,7 +43,7 @@ class Program
             var receiverOptions = new ReceiverOptions() {AllowedUpdates = { }};
             botClient.StartReceiving(
                 HandleUpdate,
-                ErrorHandler.HandleError,
+                BotErrorHandler.HandleError,
                 receiverOptions,
                 cancellationToken: cts.Token
             );
@@ -65,92 +69,16 @@ class Program
         if (update.Type == UpdateType.Message
             && update.Message?.Text != null
             && update.Message.From != null)
-            await HandleMessage(botClient, update.Message);
-    }
-
-    private static async Task HandleMessage(ITelegramBotClient botClient, Message message)
-    {
-        // Identity
-        var identity = new IdentityServer(message.From.Id);
-        if (!identity.CheckAuth())
         {
-            await botClient.SendTextMessageAsync(message.Chat.Id, 
-                "*Access denied.* You should request access and then restart bot using the command //start", 
-                ParseMode.Markdown);
-            _logger.Warn(
-                $"New user tried to connect. User Id: {message.From.Id}; Username: {message.From.Username}; FirstName: {message.From.FirstName}; LastName: {message.From.LastName}");
+            var updateHandlerMessage = new UpdateHandler_Message(botClient, update.Message, _dbContext);
+            await updateHandlerMessage.HandleMessage();
             return;
         }
         
-        try
+        if (update.Type == UpdateType.CallbackQuery)
         {
-            // Check if user exist
-            var user = _dbContext.UserList.FirstOrDefault(x => x.TelegramUserId == message.From.Id);
-            if (user == null) // If null Create User in database
-            {
-                var userService = new UserService(_dbContext);
-                user = userService.CreateUser(message.From.Id, message);
-                message.Text = "/start";
-            }
-
-            //todo make check if last message is processed
-            //check unhandled updates (messages)
-            // var updates = await botClient.GetUpdatesAsync();
-            // if (updates.Any(x => x.Message.Chat.Id == message.Chat.Id)) return;
-
-            var messageHandler = new MessageHandler(botClient, message, _dbContext, user);
-            switch (message.Text)
-            {
-                case "/start":
-                    await messageHandler.Start();
-                    break;
-                case "Know":
-                    await messageHandler.Know();
-                    break;
-                case "Don't know":
-                    await messageHandler.NotKnow();
-                    break;
-                case "Pronunciation":
-                    messageHandler.TextToSpeech();
-                    break;
-                case "/smile":
-                    user.UserSettings.IsSmileOn = !user.UserSettings.IsSmileOn;
-                    await _dbContext.SaveChangesAsync();
-                    await botClient.SendTextMessageAsync(message.Chat.Id,
-                        "Smiles is " + (user.UserSettings.IsSmileOn ? "On" : "Off"));
-                    break;
-                case "/pronunciation":
-                    user.UserSettings.IsPronunciationOn = !user.UserSettings.IsPronunciationOn;
-                    await _dbContext.SaveChangesAsync();
-                    await messageHandler.RedrawKeyboard(false);
-                    break;
-                case "/hard":
-                    await messageHandler.Hard();
-                    break;
-                case "/camb":
-                    await messageHandler.CambridgePron();
-                    break;
-                case "/ex":
-                    if (message.Chat.Id == 450056320 || message.Chat.Id == 438560103)
-                        await messageHandler.Example();
-                    break;
-            }
-        }
-        catch (Exception exception)
-        {
-            var mainErrorHandler = new MainErrorHandler(exception, botClient, message);
-            await mainErrorHandler.HandleError();
+            var handleCallbackQuery = new UpdateHandler_CallbackQuery(botClient, update.CallbackQuery, _dbContext);
+            await handleCallbackQuery.HandleCallbackQuery();
         }
     }
 }
-
-// https://t.me/my_aL1fe_bot
-// https://t.me/PhrasesAndWords_bot
-
-// Menu
-/*
-start - Restart
-smile - Smile On/Off
-pronunciation - Pronunciation On/Off
-hard - Show 10 hard-to-remember words
-*/
