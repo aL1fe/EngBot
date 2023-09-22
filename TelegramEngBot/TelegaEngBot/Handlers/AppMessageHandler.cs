@@ -173,8 +173,8 @@ public class AppMessageHandler
         foreach (var hardWord in hardWordList)
         {
             await _botClient.SendTextMessageAsync(_message.Chat.Id, hardWord.Article.EngWord + " - " + hardWord.Article.RusWord);
-            if (_user.UserSettings.IsPronunciationOn)
-                await tts.TextToSpeech(hardWord.Article);
+            // if (_user.UserSettings.IsPronunciationOn)
+            //     await tts.TextToSpeech(hardWord.Article);
         }
         
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's continue. 👇👇👇 </strong>", ParseMode.Html);
