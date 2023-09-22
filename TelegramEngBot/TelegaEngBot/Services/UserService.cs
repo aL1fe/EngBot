@@ -152,8 +152,8 @@ public class UserService
         foreach (var article in newArticleToLearn)
         {
             await _botClient.SendTextMessageAsync(_message.Chat.Id, $"{article.EngWord}  - {article.RusWord}");
-            if (user.UserSettings.IsPronunciationOn)
-                await tts.TextToSpeech(article);
+            // if (user.UserSettings.IsPronunciationOn)
+            //     await tts.TextToSpeech(article);
         }
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> 👇👇👇 Let's check ourselves. 👇👇👇 </strong>", ParseMode.Html);
     }
