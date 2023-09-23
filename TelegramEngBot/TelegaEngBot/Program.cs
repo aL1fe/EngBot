@@ -3,8 +3,6 @@ using NLog;
 using TelegaEngBot.AppConfigurations;
 using TelegaEngBot.DataAccessLayer;
 using TelegaEngBot.Handlers;
-using TelegaEngBot.Identity;
-using TelegaEngBot.Models;
 using TelegaEngBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -21,12 +19,14 @@ class Program
     static async Task Main()
     {
         _dbContext = new AppDbContext();
-        //if (AppConfig.Env == "Production") 
-            await _dbContext.Database.MigrateAsync();
-        
+
         // Check database is not empty and available
         var check = new DatabaseService(_dbContext);
         check.CheckDatabase();
+        
+        // todo need to check that CheckDatabase() works if database was changed
+        if (AppConfig.Env == "Production") 
+            await _dbContext.Database.MigrateAsync();
 
         // Check if "user vocabulary" match "common vocabulary"
         //check.MatchVocabulary();
@@ -58,7 +58,9 @@ class Program
             Console.WriteLine("Bot token not found");
         }
 
-        if (AppConfig.Env == "Production") while (true) {}
+        if (AppConfig.Env == "Production")
+            while (true)
+                await Task.Delay(TimeSpan.FromMinutes(1)); // This pause is required to run in a docker container
 
         Console.WriteLine("Press \"Enter\" to exit...");
         Console.Read();
