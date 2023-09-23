@@ -60,7 +60,7 @@ class Program
 
         if (AppConfig.Env == "Production")
             while (true)
-                await Task.Delay(TimeSpan.FromMinutes(1)); // This pause is required to run in a docker container
+                await Task.Delay(1000); // This pause is required to run in a docker container
 
         Console.WriteLine("Press \"Enter\" to exit...");
         Console.Read();
