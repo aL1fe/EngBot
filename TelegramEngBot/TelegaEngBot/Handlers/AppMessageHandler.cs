@@ -203,17 +203,14 @@ public class AppMessageHandler
 
     public async Task LastActivity()
     {
-        var lastActivity = _dbContext.UserList.Max(x => x.LastActivity);
-        var user = _dbContext.UserList
-            .FirstOrDefault(x => x.LastActivity == lastActivity);
+        var lastActivityAppUsers = _dbContext.UserList
+            .OrderByDescending(x => x.LastActivity)
+            .Take(5);
 
-        // convert UTC to local time zone
-        var localTimeZone = TimeZoneInfo.Local;
-        lastActivity = localTimeZone.IsDaylightSavingTime(DateTime.Now)
-            ? lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours - 1)
-            : lastActivity.AddHours(localTimeZone.BaseUtcOffset.Hours);
-        
-        await _botClient.SendTextMessageAsync(_message.Chat.Id,
-            $"{user.TelegramFirstName} - {lastActivity.ToString("dd/MM/yyyy HH:mm:ss")}");
+        foreach (var user in lastActivityAppUsers)
+        {
+            await _botClient.SendTextMessageAsync(_message.Chat.Id,
+                $"{user.TelegramFirstName} - {user.LastActivity.ToString("dd/MM/yyyy HH:mm:ss")}");
+        }
     }
 }
