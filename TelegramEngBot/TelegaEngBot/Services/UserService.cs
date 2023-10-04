@@ -5,7 +5,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bots.Http;
 
 #pragma warning disable CS8602
 
@@ -146,8 +145,12 @@ public class UserService
 
         user.UserVocabulary.AddRange(newItemsToAdd);
         await _context.SaveChangesAsync();
-        
+
+        var articlesAdded = user.UserVocabulary.Count;
+        var articlesTotal = _context.CommonVocabulary
+            .Count(x => x.DifficultyLevel == user.UserSettings.DifficultyLevel);
         await _botClient.SendTextMessageAsync(_message.Chat.Id, "<strong> ❤️❤️❤️ It's time to learn new words. ❤️❤️❤️ </strong>", ParseMode.Html);
+        await _botClient.SendTextMessageAsync(_message.Chat.Id, $"<strong>Your vocabulary {articlesAdded} words from {articlesTotal}</strong>", ParseMode.Html);
         var tts = new Pronunciation(_botClient, _message);
         foreach (var article in newArticleToLearn)
         {
